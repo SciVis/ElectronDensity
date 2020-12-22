@@ -33,6 +33,14 @@
 #include <inviwo/core/processors/processor.h>
 #include <inviwo/core/properties/ordinalproperty.h>
 #include <inviwo/core/ports/imageport.h>
+#include <inviwo/core/ports/volumeport.h>
+#include <inviwo/dataframe/datastructures/dataframe.h>
+#include <inviwo/core/datastructures/volume/volumeram.h>
+#include <inviwo/core/datastructures/volume/volumeramprecision.h>
+#include <inviwo/core/util/volumeramutils.h>
+#include <inviwo/core/util/indexmapper.h>
+#include <vector>
+#include <unordered_map>
 
 namespace inviwo {
 
@@ -61,8 +69,10 @@ public:
     static const ProcessorInfo processorInfo_;
 
 private:
-    ImageOutport outport_;
-    FloatVec3Property position_;
+    VolumeInport segmentation_;
+    VolumeInport volumeValues_;
+    DataFrameOutport chargePerRegion_;
+    DataFrameOutport chargePerSubgroup_;
 };
 
 }  // namespace inviwo
