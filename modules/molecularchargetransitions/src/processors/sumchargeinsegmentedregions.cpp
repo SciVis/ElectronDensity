@@ -129,11 +129,11 @@ namespace inviwo {
 		// TODO: check that the subgroups together contain all segmented regions
 
 		auto subgroupDataFrame = std::make_shared<DataFrame>(static_cast<glm::u32>(2 * subgroupInfo.size()));
-		auto& colA = subgroupDataFrame->addColumn<uint16_t>("Subgroup index", subgroupInfo.size())
+		auto& colA = subgroupDataFrame->addColumn<uint16_t>("index_sg", subgroupInfo.size())
 			->getTypedBuffer()
 			->getEditableRAMRepresentation()
 			->getDataContainer();
-		auto& colB = subgroupDataFrame->addColumn<float>("Charge subgroup [%]", subgroupInfo.size())
+		auto& colB = subgroupDataFrame->addColumn<float>("charge_sg", subgroupInfo.size())
 			->getTypedBuffer()
 			->getEditableRAMRepresentation()
 			->getDataContainer();
