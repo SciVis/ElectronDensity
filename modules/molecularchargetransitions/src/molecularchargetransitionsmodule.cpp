@@ -28,6 +28,7 @@
  *********************************************************************************/
 
 #include <inviwo/molecularchargetransitions/molecularchargetransitionsmodule.h>
+#include <inviwo/molecularchargetransitions/processors/computechargetransfer.h>
 #include <inviwo/molecularchargetransitions/processors/sumchargeinsegmentedregions.h>
 
 namespace inviwo {
@@ -39,6 +40,7 @@ MolecularChargeTransitionsModule::MolecularChargeTransitionsModule(InviwoApplica
     // Register objects that can be shared with the rest of inviwo here:
 
     // Processors
+    registerProcessor<ComputeChargeTransfer>();
     // registerProcessor<MolecularChargeTransitionsProcessor>();
     registerProcessor<SumChargeInSegmentedRegions>();
 
