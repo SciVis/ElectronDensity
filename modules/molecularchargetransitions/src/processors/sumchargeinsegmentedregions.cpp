@@ -46,12 +46,14 @@ namespace inviwo {
 		, segmentation_("volumeSegmentation")
 		, volumeValues_("chargeDensity")
 		, chargePerRegion_("chargePerRegion")
-		, chargePerSubgroup_("chargePerSubgroup") {
+		, chargePerSubgroup_("chargePerSubgroup")
+		, fileLocation_("fileLocation", "Subgroup file location (json)") {
 
 		addPort(segmentation_);
 		addPort(volumeValues_);
 		addPort(chargePerRegion_);
 		addPort(chargePerSubgroup_);
+		addProperty(fileLocation_);
 	}
 
 	void SumChargeInSegmentedRegions::process() {
@@ -59,9 +61,18 @@ namespace inviwo {
 
 		const auto segmentationData = segmentation_.getData();
 		const auto volumeData = volumeValues_.getData();
+		const auto fileLoc = fileLocation_.get();
 
 		if (volumeData->getDimensions() != segmentationData->getDimensions()) {
 			throw Exception("Unexpected dimension missmatch", IVW_CONTEXT);
+		}
+
+		if (fileLoc == "") {
+			throw Exception("No subgroup file provided", IVW_CONTEXT);
+		}
+
+		if (!filesystem::fileExists(fileLoc)) {
+			throw Exception("Subgroup file does not exist", IVW_CONTEXT);
 		}
 
 		const auto range = segmentationData->dataMap_.valueRange;
@@ -115,36 +126,41 @@ namespace inviwo {
 		for (auto& indexToAccumulatedValue : indicesToAccumulatedValue) {
 			col1[i] = indexToAccumulatedValue.first;
 			col2[i] = indexToAccumulatedValue.second;
-			col3[i] = 100.0 * indexToAccumulatedValue.second / totalCharge;
+			col3[i] = indexToAccumulatedValue.second / totalCharge;
 			i++;
 		}
 
-		// Subgroup information, should be an inport?
-		auto subgroupInfo = std::unordered_map<uint16_t, std::vector<uint16_t>>();
-		// Thio
-		subgroupInfo.emplace(0, std::vector<uint16_t>{0, 1, 2, 3, 12, 13, 14, 15});
-		// Quin
-		subgroupInfo.emplace(1, std::vector<uint16_t>{4, 5, 6, 7, 8, 9, 10, 11, 16, 17, 18, 19, 20, 21, 22});
+		auto fileStream = filesystem::ifstream(fileLoc);
+		nlohmann::json subgroupsJson;
+		fileStream >> subgroupsJson;
 
-		// TODO: check that the subgroups together contain all segmented regions
+		const auto totalNrOfSubgroups = std::accumulate(subgroupsJson.cbegin(), subgroupsJson.cend(), 0,
+			[&](uint16_t value, auto current) {
+				if (!current.contains("indices")) {
+					throw Exception("Wrong format on json object (does not contain 'indices')", IVW_CONTEXT);
+				}
+				return value + current["indices"].size();
+			});
 
-		auto subgroupDataFrame = std::make_shared<DataFrame>(static_cast<glm::u32>(2 * subgroupInfo.size()));
-		auto& colA = subgroupDataFrame->addColumn<uint16_t>("index_sg", subgroupInfo.size())
-			->getTypedBuffer()
-			->getEditableRAMRepresentation()
-			->getDataContainer();
-		auto& colB = subgroupDataFrame->addColumn<float>("charge_sg", subgroupInfo.size())
-			->getTypedBuffer()
-			->getEditableRAMRepresentation()
-			->getDataContainer();
-
-		size_t j = 0;
-		for (auto& subgroup : subgroupInfo) {
-			colA[j] = subgroup.first;
-			colB[j] = std::accumulate(subgroup.second.begin(), subgroup.second.end(), 0.0f,
-				[col3](float value, auto current) { return value + col3[current]; });
-			j++;
+		if (totalNrOfSubgroups != indicesToAccumulatedValue.size()) {
+			throw Exception("Subgroup info (indices) does not match the number of segmented regions", IVW_CONTEXT);
 		}
+
+		auto subgroupDataFrame = std::make_shared<DataFrame>(static_cast<glm::u32>(2 * subgroupsJson.size()));
+
+		std::vector<std::string> subgroupNames = {};
+		std::vector<float> charges = {};
+		for (auto& subgroup : subgroupsJson) {
+			if (!subgroup.contains("name")) {
+				throw Exception("Wrong format on json object (does not contain 'name')", IVW_CONTEXT);
+			}
+
+			subgroupNames.push_back(subgroup["name"]);
+			charges.push_back(std::accumulate(subgroup["indices"].begin(), subgroup["indices"].end(), 0.0f,
+				[col3](float value, auto current) { return value + col3[current]; }));
+		}
+		subgroupDataFrame->addCategoricalColumn("subgroup", subgroupNames);
+		subgroupDataFrame->addColumn("charge_sg", charges);
 
 		chargePerRegion_.setData(dataFrame);
 		chargePerSubgroup_.setData(subgroupDataFrame);

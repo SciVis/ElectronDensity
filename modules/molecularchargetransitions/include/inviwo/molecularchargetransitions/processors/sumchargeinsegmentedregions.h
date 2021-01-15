@@ -32,13 +32,15 @@
 #include <inviwo/molecularchargetransitions/molecularchargetransitionsmoduledefine.h>
 #include <inviwo/core/processors/processor.h>
 #include <inviwo/core/properties/ordinalproperty.h>
-#include <inviwo/core/ports/imageport.h>
 #include <inviwo/core/ports/volumeport.h>
 #include <inviwo/dataframe/datastructures/dataframe.h>
 #include <inviwo/core/datastructures/volume/volumeram.h>
 #include <inviwo/core/datastructures/volume/volumeramprecision.h>
 #include <inviwo/core/util/volumeramutils.h>
 #include <inviwo/core/util/indexmapper.h>
+#include <inviwo/core/properties/fileproperty.h>
+#include <inviwo/core/util/filesystem.h>
+#include <nlohmann/json.hpp>
 #include <vector>
 #include <unordered_map>
 
@@ -73,6 +75,7 @@ private:
     VolumeInport volumeValues_;
     DataFrameOutport chargePerRegion_;
     DataFrameOutport chargePerSubgroup_;
+    FileProperty fileLocation_;
 };
 
 }  // namespace inviwo
