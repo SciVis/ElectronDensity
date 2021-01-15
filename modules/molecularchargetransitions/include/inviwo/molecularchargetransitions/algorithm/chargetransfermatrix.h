@@ -2,7 +2,7 @@
  *
  * Inviwo - Interactive Visualization Workshop
  *
- * Copyright (c) 2020 Inviwo Foundation
+ * Copyright (c) 2021 Inviwo Foundation
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,49 +26,29 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  *********************************************************************************/
-
 #pragma once
 
 #include <inviwo/molecularchargetransitions/molecularchargetransitionsmoduledefine.h>
-#include <inviwo/core/processors/processor.h>
-#include <inviwo/core/properties/ordinalproperty.h>
-#include <inviwo/dataframe/datastructures/dataframe.h>
-#include <inviwo/molecularchargetransitions/algorithm/chargetransfermatrix.h>
 #include <vector>
 
 namespace inviwo {
 
-	/** \docpage{org.inviwo.ComputeChargeTransfer, Compute Charge Transfer}
-	 * ![](org.inviwo.ComputeChargeTransfer.png?classIdentifier=org.inviwo.ComputeChargeTransfer)
+	/**
+	 * Implementation to calculate the ("transposed") Charge Transfer matrix
+	 * and the charge difference (from hole to particle charge).
 	 *
-	 * Processor to calculate the charge transfer matrix, given the hole and particle charges for each subgroup.
-	 * It also calculates the difference in charge from hole to particle for each subgroup.
+	 * The charge transfer matrix is on a "vector of columns" form (vector<vector<float>>) 
+	 * to make it easier to obtain the columns (the "transpose" of the actual charge transfer matrix).
 	 *
-	 * ### Inports
-	 *   * __holeCharges__      The hole charges for each subgroup (column name charge_sg).
-	 *   * __particleCharges__  The particle charges for each subgroup (column name charge_sg).
-	 *                          Must be same length as holeCharges_.
+	 *     * holeCharges is a vector with the charges for the hole state.
+	 *     * particleCharges is a vector with the charges for the particle state.
 	 *
-	 * ### Outports
-	 *   * __chargeDifference__ Difference in charge from hole to particle ("particle - hole") for each subgroup.
-	 *   * __chargeTransfer__   Charge transfer matrix.
-	 *
+	 * The input vectors must have the same length!
 	 */
-	class IVW_MODULE_MOLECULARCHARGETRANSITIONS_API ComputeChargeTransfer : public Processor {
+	class IVW_MODULE_MOLECULARCHARGETRANSITIONS_API ChargeTransferMatrix {
 	public:
-		ComputeChargeTransfer();
-		virtual ~ComputeChargeTransfer() = default;
-
-		virtual void process() override;
-
-		virtual const ProcessorInfo getProcessorInfo() const override;
-		static const ProcessorInfo processorInfo_;
-
-	private:
-		DataFrameInport holeCharges_;
-		DataFrameInport particleCharges_;
-		DataFrameOutport chargeDifference_;
-		DataFrameOutport chargeTransfer_;
+		static std::pair<std::vector<std::vector<float>>, std::vector<float>>
+			computeTransposedChargeTransferAndChargeDifference(std::vector<float> holeCharges, std::vector<float> particleCharges);
 	};
 
 }  // namespace inviwo

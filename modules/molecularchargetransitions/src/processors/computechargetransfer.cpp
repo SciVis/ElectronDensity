@@ -64,7 +64,7 @@ namespace inviwo {
 			std::vector<float> dst(data.size(), 0.0f);
 			std::transform(data.begin(), data.end(), dst.begin(),
 				[&](auto v) { return static_cast<float>(v); });
-					return dst;
+			return dst;
 				});
 
 		const auto particleCharges = particleCharges_.getData()->getColumn("charge_sg")
@@ -75,12 +75,15 @@ namespace inviwo {
 			std::vector<float> dst(data.size(), 0.0f);
 			std::transform(data.begin(), data.end(), dst.begin(),
 				[&](auto v) { return static_cast<float>(v); });
-					return dst;
+			return dst;
 				});
 
 		if (holeCharges.size() != particleCharges.size()) {
 			throw Exception("Unexpected dimension missmatch", IVW_CONTEXT);
 		}
+
+		const auto [chargeTransfer, chargeDifference] =
+			ChargeTransferMatrix::computeTransposedChargeTransferAndChargeDifference(holeCharges, particleCharges);
 
 		const auto n = holeCharges.size();
 
@@ -91,56 +94,14 @@ namespace inviwo {
 			->getDataContainer();
 
 		auto chargeTransferDataFrame = std::make_shared<DataFrame>(static_cast<glm::u32>(n));
-
-		// Charge transfer matrix 
-		// (Actually the transpose of the "real" charge transfer matrix, 
-		// to easily obtain the columns as rows below)
-		std::vector<std::vector<float>> transfer = {};
-		transfer.resize(n);
-
-		auto donors = std::vector<size_t>();
-		auto acceptors = std::vector<size_t>();
-		auto chargeDifference = std::vector<float>();
-
 		for (auto i = 0; i < n; i++) {
-			const auto chargeDiff = particleCharges[i] - holeCharges[i];
-			col1[i] = chargeDiff;
-			chargeDifference.push_back(chargeDiff);
-
-			// Donor
-			if (chargeDiff < 0) {
-				donors.push_back(i);
-			}
-			// Acceptor
-			else {
-				acceptors.push_back(i);
-			}
-			transfer[i].resize(n);
-			transfer[i][i] = std::min(holeCharges[i], particleCharges[i]);
-		}
-
-		float totalAcceptorCharge = 0.0f;
-		for (auto& aIndex : acceptors) {
-			totalAcceptorCharge += chargeDifference[aIndex];
-		}
-
-		// Heuristic
-		for (auto& dIndex : donors) {
-			for (auto& aIndex : acceptors) {
-				// transpose of charge transfer matrix
-				transfer[dIndex][aIndex] = -chargeDifference[dIndex] * 
-					(chargeDifference[aIndex] / totalAcceptorCharge);
-			}
-		}
-
-		for (auto i = 0; i < n; i++) {
+			col1[i] = chargeDifference[i];
 			auto& col = chargeTransferDataFrame->addColumn<float>(toString(i + 1), n)
 				->getTypedBuffer()
 				->getEditableRAMRepresentation()
 				->getDataContainer();
-			// since this matrix is the transpose of the charge transfer matrix, 
-			// the column is obtained by taking the row
-			col = transfer[i];
+			// This charge transfer matrix is the on the form "vector of columns"
+			col = chargeTransfer[i];
 		}
 
 		chargeDifference_.setData(chargeDiffDataFrame);

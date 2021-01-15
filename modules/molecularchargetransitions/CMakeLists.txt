@@ -1,6 +1,7 @@
 ivw_module(MolecularChargeTransitions)
 
 set(HEADER_FILES
+    include/inviwo/molecularchargetransitions/algorithm/chargetransfermatrix.h
     include/inviwo/molecularchargetransitions/molecularchargetransitionsmodule.h
     include/inviwo/molecularchargetransitions/molecularchargetransitionsmoduledefine.h
     include/inviwo/molecularchargetransitions/processors/computechargetransfer.h
@@ -9,6 +10,7 @@ set(HEADER_FILES
 ivw_group("Header Files" ${HEADER_FILES})
 
 set(SOURCE_FILES
+    src/algorithm/chargetransfermatrix.cpp
     src/molecularchargetransitionsmodule.cpp
     src/processors/computechargetransfer.cpp
     src/processors/sumchargeinsegmentedregions.cpp
