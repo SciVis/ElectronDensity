@@ -33,7 +33,8 @@
 
 namespace inviwo {
 
-MolecularChargeTransitionsModule::MolecularChargeTransitionsModule(InviwoApplication* app) : InviwoModule(app, "MolecularChargeTransitions") {
+MolecularChargeTransitionsModule::MolecularChargeTransitionsModule(InviwoApplication* app) : 
+    InviwoModule(app, "MolecularChargeTransitions"), pythonFolderObserver_{ app, getPath() + "/src/processors", *this } {
     // Add a directory to the search path of the Shadermanager
     // ShaderManager::getPtr()->addShaderSearchPath(getPath(ModulePath::GLSL));
 
