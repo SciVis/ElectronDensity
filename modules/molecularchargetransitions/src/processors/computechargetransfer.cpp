@@ -46,12 +46,14 @@ namespace inviwo {
 		, holeCharges_("holeCharges")
 		, particleCharges_("particleCharges")
 		, chargeDifference_("chargeDifference")
-		, chargeTransfer_("chargeTransfer") {
+		, chargeTransfer_("chargeTransfer")
+		, holeAndParticleCharges_("holeAndParticleCharges") {
 
 		addPort(holeCharges_);
 		addPort(particleCharges_);
 		addPort(chargeDifference_);
 		addPort(chargeTransfer_);
+		addPort(holeAndParticleCharges_);
 	}
 
 	void ComputeChargeTransfer::process() {
@@ -104,8 +106,14 @@ namespace inviwo {
 			col = chargeTransfer[i];
 		}
 
+		std::vector<float> dst;
+		std::merge(holeCharges.begin(), holeCharges.end(), particleCharges.begin(), particleCharges.end(), std::back_inserter(dst));
+		auto holeAndParticleChargesDataFrame = std::make_shared<DataFrame>(static_cast<glm::u32>(n));
+		holeAndParticleChargesDataFrame->addColumn("charges", dst);
+
 		chargeDifference_.setData(chargeDiffDataFrame);
 		chargeTransfer_.setData(chargeTransferDataFrame);
+		holeAndParticleCharges_.setData(holeAndParticleChargesDataFrame);
 	}
 
 }  // namespace inviwo

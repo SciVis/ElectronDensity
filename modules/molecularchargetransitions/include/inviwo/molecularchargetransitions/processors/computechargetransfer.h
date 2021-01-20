@@ -69,6 +69,7 @@ namespace inviwo {
 		DataFrameInport particleCharges_;
 		DataFrameOutport chargeDifference_;
 		DataFrameOutport chargeTransfer_;
+		DataFrameOutport holeAndParticleCharges_;
 	};
 
 }  // namespace inviwo
