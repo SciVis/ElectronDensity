@@ -4,6 +4,7 @@ set(dependencies
     #InviwoOpenGLModule # Example dependency 
     InviwoBaseModule
     InviwoDataFrameModule
+    InviwoPython3Module
 )
 
 # Add an alias for this module. Several modules can share an alias. 
