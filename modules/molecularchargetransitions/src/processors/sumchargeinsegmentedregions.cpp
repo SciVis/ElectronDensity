@@ -65,105 +65,110 @@ namespace inviwo {
 
 		if (volumeData->getDimensions() != segmentationData->getDimensions()) {
 			throw Exception("Unexpected dimension missmatch", IVW_CONTEXT);
+			chargePerRegion_.setData(nullptr);
+			chargePerSubgroup_.setData(nullptr);
 		}
-
-		if (fileLoc == "") {
+		else if (fileLoc == "") {
 			throw Exception("No subgroup file provided", IVW_CONTEXT);
+			chargePerRegion_.setData(nullptr);
+			chargePerSubgroup_.setData(nullptr);
 		}
-
-		if (!filesystem::fileExists(fileLoc)) {
+		else if (!filesystem::fileExists(fileLoc)) {
 			throw Exception("Subgroup file does not exist", IVW_CONTEXT);
+			chargePerRegion_.setData(nullptr);
+			chargePerSubgroup_.setData(nullptr);
 		}
+		else {
+			const auto range = segmentationData->dataMap_.valueRange;
 
-		const auto range = segmentationData->dataMap_.valueRange;
-
-		// TODO: do I really need to set an initial value here?
-		auto indicesToAccumulatedValue = std::unordered_map<uint16_t, float>();
-		for (auto i = static_cast<uint16_t>(range.x); i < static_cast<uint16_t>(range.y); i++) {
-			indicesToAccumulatedValue.emplace(i, 0.0);
-		}
-
-		if (indicesToAccumulatedValue.size() == 0) {
-			throw Exception("Seem to be no segmented regions in the segmented volume...", IVW_CONTEXT);
-		}
-
-		const util::IndexMapper3D im(volumeData->getDimensions());
-		volumeData->getRepresentation<VolumeRAM>()->dispatch<void, dispatching::filter::FloatScalars>([&](auto vr) {
-			using ChargeDensityValueType = util::PrecisionValueType<decltype(vr)>;
-			const ChargeDensityValueType* src = vr->getDataTyped();
-
-			segmentationData->getRepresentation<VolumeRAM>()->dispatch<void, dispatching::filter::UnsignedIntegerScalars>([&](auto seg) {
-				using VolumeSegmentationValueType = util::PrecisionValueType<decltype(seg)>;
-				const VolumeSegmentationValueType* indices = seg->getDataTyped();
-
-				util::forEachVoxel(*vr, [&](const size3_t& pos) {
-					float value = static_cast<float>(src[im(pos)]);
-					uint16_t index = static_cast<uint16_t>(indices[im(pos)]);
-					indicesToAccumulatedValue.at(index) = indicesToAccumulatedValue.at(index) + value;
-					});
-				});
-			});
-
-		float totalCharge =
-			std::accumulate(indicesToAccumulatedValue.begin(), indicesToAccumulatedValue.end(), 0.0f,
-				[](float value, auto current) { return value + current.second; });
-
-		auto dataFrame = std::make_shared<DataFrame>(static_cast<glm::u32>(3 * indicesToAccumulatedValue.size()));
-		auto& col1 = dataFrame->addColumn<uint16_t>("Segmented region", indicesToAccumulatedValue.size())
-			->getTypedBuffer()
-			->getEditableRAMRepresentation()
-			->getDataContainer();
-		auto& col2 = dataFrame->addColumn<float>("Charge", indicesToAccumulatedValue.size())
-			->getTypedBuffer()
-			->getEditableRAMRepresentation()
-			->getDataContainer();
-		auto& col3 = dataFrame->addColumn<float>("Charge [%]", indicesToAccumulatedValue.size())
-			->getTypedBuffer()
-			->getEditableRAMRepresentation()
-			->getDataContainer();
-
-		size_t i = 0;
-		for (auto& indexToAccumulatedValue : indicesToAccumulatedValue) {
-			col1[i] = indexToAccumulatedValue.first;
-			col2[i] = indexToAccumulatedValue.second;
-			col3[i] = indexToAccumulatedValue.second / totalCharge;
-			i++;
-		}
-
-		auto fileStream = filesystem::ifstream(fileLoc);
-		nlohmann::json subgroupsJson;
-		fileStream >> subgroupsJson;
-
-		const auto totalNrOfSubgroups = std::accumulate(subgroupsJson.cbegin(), subgroupsJson.cend(), 0,
-			[&](uint16_t value, auto current) {
-				if (!current.contains("indices")) {
-					throw Exception("Wrong format on json object (does not contain 'indices')", IVW_CONTEXT);
-				}
-				return value + current["indices"].size();
-			});
-
-		if (totalNrOfSubgroups != indicesToAccumulatedValue.size()) {
-			throw Exception("Subgroup info (indices) does not match the number of segmented regions", IVW_CONTEXT);
-		}
-
-		auto subgroupDataFrame = std::make_shared<DataFrame>(static_cast<glm::u32>(2 * subgroupsJson.size()));
-
-		std::vector<std::string> subgroupNames = {};
-		std::vector<float> charges = {};
-		for (auto& subgroup : subgroupsJson) {
-			if (!subgroup.contains("name")) {
-				throw Exception("Wrong format on json object (does not contain 'name')", IVW_CONTEXT);
+			// TODO: do I really need to set an initial value here?
+			auto indicesToAccumulatedValue = std::unordered_map<uint16_t, float>();
+			for (auto i = static_cast<uint16_t>(range.x); i < static_cast<uint16_t>(range.y); i++) {
+				indicesToAccumulatedValue.emplace(i, 0.0);
 			}
 
-			subgroupNames.push_back(subgroup["name"]);
-			charges.push_back(std::accumulate(subgroup["indices"].begin(), subgroup["indices"].end(), 0.0f,
-				[col3](float value, auto current) { return value + col3[current]; }));
-		}
-		subgroupDataFrame->addCategoricalColumn("subgroup", subgroupNames);
-		subgroupDataFrame->addColumn("charge_sg", charges);
+			if (indicesToAccumulatedValue.size() == 0) {
+				throw Exception("Seem to be no segmented regions in the segmented volume...", IVW_CONTEXT);
+			}
 
-		chargePerRegion_.setData(dataFrame);
-		chargePerSubgroup_.setData(subgroupDataFrame);
+			const util::IndexMapper3D im(volumeData->getDimensions());
+			volumeData->getRepresentation<VolumeRAM>()->dispatch<void, dispatching::filter::FloatScalars>([&](auto vr) {
+				using ChargeDensityValueType = util::PrecisionValueType<decltype(vr)>;
+				const ChargeDensityValueType* src = vr->getDataTyped();
+
+				segmentationData->getRepresentation<VolumeRAM>()->dispatch<void, dispatching::filter::UnsignedIntegerScalars>([&](auto seg) {
+					using VolumeSegmentationValueType = util::PrecisionValueType<decltype(seg)>;
+					const VolumeSegmentationValueType* indices = seg->getDataTyped();
+
+					util::forEachVoxel(*vr, [&](const size3_t& pos) {
+						float value = static_cast<float>(src[im(pos)]);
+						uint16_t index = static_cast<uint16_t>(indices[im(pos)]);
+						indicesToAccumulatedValue.at(index) = indicesToAccumulatedValue.at(index) + value;
+						});
+					});
+				});
+
+			float totalCharge =
+				std::accumulate(indicesToAccumulatedValue.begin(), indicesToAccumulatedValue.end(), 0.0f,
+					[](float value, auto current) { return value + current.second; });
+
+			auto dataFrame = std::make_shared<DataFrame>(static_cast<glm::u32>(3 * indicesToAccumulatedValue.size()));
+			auto& col1 = dataFrame->addColumn<uint16_t>("Segmented region", indicesToAccumulatedValue.size())
+				->getTypedBuffer()
+				->getEditableRAMRepresentation()
+				->getDataContainer();
+			auto& col2 = dataFrame->addColumn<float>("Charge", indicesToAccumulatedValue.size())
+				->getTypedBuffer()
+				->getEditableRAMRepresentation()
+				->getDataContainer();
+			auto& col3 = dataFrame->addColumn<float>("Charge [%]", indicesToAccumulatedValue.size())
+				->getTypedBuffer()
+				->getEditableRAMRepresentation()
+				->getDataContainer();
+
+			size_t i = 0;
+			for (auto& indexToAccumulatedValue : indicesToAccumulatedValue) {
+				col1[i] = indexToAccumulatedValue.first;
+				col2[i] = indexToAccumulatedValue.second;
+				col3[i] = indexToAccumulatedValue.second / totalCharge;
+				i++;
+			}
+
+			auto fileStream = filesystem::ifstream(fileLoc);
+			nlohmann::json subgroupsJson;
+			fileStream >> subgroupsJson;
+
+			const auto totalNrOfSubgroups = std::accumulate(subgroupsJson.cbegin(), subgroupsJson.cend(), 0,
+				[&](uint16_t value, auto current) {
+					if (!current.contains("indices")) {
+						throw Exception("Wrong format on json object (does not contain 'indices')", IVW_CONTEXT);
+					}
+					return value + current["indices"].size();
+				});
+
+			if (totalNrOfSubgroups != indicesToAccumulatedValue.size()) {
+				throw Exception("Subgroup info (indices) does not match the number of segmented regions", IVW_CONTEXT);
+			}
+
+			auto subgroupDataFrame = std::make_shared<DataFrame>(static_cast<glm::u32>(2 * subgroupsJson.size()));
+
+			std::vector<std::string> subgroupNames = {};
+			std::vector<float> charges = {};
+			for (auto& subgroup : subgroupsJson) {
+				if (!subgroup.contains("name")) {
+					throw Exception("Wrong format on json object (does not contain 'name')", IVW_CONTEXT);
+				}
+
+				subgroupNames.push_back(subgroup["name"]);
+				charges.push_back(std::accumulate(subgroup["indices"].begin(), subgroup["indices"].end(), 0.0f,
+					[col3](float value, auto current) { return value + col3[current]; }));
+			}
+			subgroupDataFrame->addCategoricalColumn("subgroup", subgroupNames);
+			subgroupDataFrame->addColumn("charge_sg", charges);
+
+			chargePerRegion_.setData(dataFrame);
+			chargePerSubgroup_.setData(subgroupDataFrame);
+		}
 	}
 
 }  // namespace inviwo
