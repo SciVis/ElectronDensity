@@ -60,6 +60,7 @@ namespace inviwo {
 		virtual ~ComputeChargeTransfer() = default;
 
 		virtual void process() override;
+		virtual void doIfNotReady() override;
 
 		virtual const ProcessorInfo getProcessorInfo() const override;
 		static const ProcessorInfo processorInfo_;

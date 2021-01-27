@@ -83,6 +83,9 @@ namespace inviwo {
 		if (holeCharges.size() != particleCharges.size()) {
 			throw Exception("Unexpected dimension missmatch", IVW_CONTEXT);
 		}
+		if (holeCharges.size() == 0) {
+			throw Exception("No input charges", IVW_CONTEXT);
+		}
 
 		const auto [chargeTransfer, chargeDifference] =
 			ChargeTransferMatrix::computeTransposedChargeTransferAndChargeDifference(holeCharges, particleCharges);
@@ -114,6 +117,12 @@ namespace inviwo {
 		chargeDifference_.setData(chargeDiffDataFrame);
 		chargeTransfer_.setData(chargeTransferDataFrame);
 		holeAndParticleCharges_.setData(holeAndParticleChargesDataFrame);
+	}
+
+	void ComputeChargeTransfer::doIfNotReady() {
+		chargeDifference_.setData(nullptr);
+		chargeTransfer_.setData(nullptr);
+		holeAndParticleCharges_.setData(nullptr);
 	}
 
 }  // namespace inviwo
