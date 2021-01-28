@@ -33,22 +33,23 @@
 
 namespace inviwo {
 
-	/**
-	 * Implementation to calculate the ("transposed") Charge Transfer matrix
-	 * and the charge difference (from hole to particle charge).
-	 *
-	 * The charge transfer matrix is on a "vector of columns" form (vector<vector<float>>) 
-	 * to make it easier to obtain the columns (the "transpose" of the actual charge transfer matrix).
-	 *
-	 *     * holeCharges is a vector with the charges for the hole state.
-	 *     * particleCharges is a vector with the charges for the particle state.
-	 *
-	 * The input vectors must have the same length!
-	 */
-	class IVW_MODULE_MOLECULARCHARGETRANSITIONS_API ChargeTransferMatrix {
-	public:
-		static std::pair<std::vector<std::vector<float>>, std::vector<float>>
-			computeTransposedChargeTransferAndChargeDifference(std::vector<float> holeCharges, std::vector<float> particleCharges);
-	};
+/**
+ * Implementation to calculate the ("transposed") Charge Transfer matrix
+ * and the charge difference (from hole to particle charge).
+ *
+ * The charge transfer matrix is on a "vector of columns" form (vector<vector<float>>)
+ * to make it easier to obtain the columns (the "transpose" of the actual charge transfer matrix).
+ *
+ *     * holeCharges is a vector with the charges for the hole state.
+ *     * particleCharges is a vector with the charges for the particle state.
+ *
+ * The input vectors must have the same length!
+ */
+class IVW_MODULE_MOLECULARCHARGETRANSITIONS_API ChargeTransferMatrix {
+public:
+    static std::pair<std::vector<std::vector<float>>, std::vector<float>>
+    computeTransposedChargeTransferAndChargeDifference(std::vector<float> holeCharges,
+                                                       std::vector<float> particleCharges);
+};
 
 }  // namespace inviwo

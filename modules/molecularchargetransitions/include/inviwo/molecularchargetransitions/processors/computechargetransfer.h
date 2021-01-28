@@ -38,39 +38,40 @@
 
 namespace inviwo {
 
-	/** \docpage{org.inviwo.ComputeChargeTransfer, Compute Charge Transfer}
-	 * ![](org.inviwo.ComputeChargeTransfer.png?classIdentifier=org.inviwo.ComputeChargeTransfer)
-	 *
-	 * Processor to calculate the charge transfer matrix, given the hole and particle charges for each subgroup.
-	 * It also calculates the difference in charge from hole to particle for each subgroup.
-	 *
-	 * ### Inports
-	 *   * __holeCharges__      The hole charges for each subgroup (column name charge_sg).
-	 *   * __particleCharges__  The particle charges for each subgroup (column name charge_sg).
-	 *                          Must be same length as holeCharges_.
-	 *
-	 * ### Outports
-	 *   * __chargeDifference__ Difference in charge from hole to particle ("particle - hole") for each subgroup.
-	 *   * __chargeTransfer__   Charge transfer matrix.
-	 *
-	 */
-	class IVW_MODULE_MOLECULARCHARGETRANSITIONS_API ComputeChargeTransfer : public Processor {
-	public:
-		ComputeChargeTransfer();
-		virtual ~ComputeChargeTransfer() = default;
+/** \docpage{org.inviwo.ComputeChargeTransfer, Compute Charge Transfer}
+ * ![](org.inviwo.ComputeChargeTransfer.png?classIdentifier=org.inviwo.ComputeChargeTransfer)
+ *
+ * Processor to calculate the charge transfer matrix, given the hole and particle charges for each
+ * subgroup. It also calculates the difference in charge from hole to particle for each subgroup.
+ *
+ * ### Inports
+ *   * __holeCharges__      The hole charges for each subgroup (column name charge_sg).
+ *   * __particleCharges__  The particle charges for each subgroup (column name charge_sg).
+ *                          Must be same length as holeCharges_.
+ *
+ * ### Outports
+ *   * __chargeDifference__ Difference in charge from hole to particle ("particle - hole") for each
+ * subgroup.
+ *   * __chargeTransfer__   Charge transfer matrix.
+ *
+ */
+class IVW_MODULE_MOLECULARCHARGETRANSITIONS_API ComputeChargeTransfer : public Processor {
+public:
+    ComputeChargeTransfer();
+    virtual ~ComputeChargeTransfer() = default;
 
-		virtual void process() override;
-		virtual void doIfNotReady() override;
+    virtual void process() override;
+    virtual void doIfNotReady() override;
 
-		virtual const ProcessorInfo getProcessorInfo() const override;
-		static const ProcessorInfo processorInfo_;
+    virtual const ProcessorInfo getProcessorInfo() const override;
+    static const ProcessorInfo processorInfo_;
 
-	private:
-		DataFrameInport holeCharges_;
-		DataFrameInport particleCharges_;
-		DataFrameOutport chargeDifference_;
-		DataFrameOutport chargeTransfer_;
-		DataFrameOutport holeAndParticleCharges_;
-	};
+private:
+    DataFrameInport holeCharges_;
+    DataFrameInport particleCharges_;
+    DataFrameOutport chargeDifference_;
+    DataFrameOutport chargeTransfer_;
+    DataFrameOutport holeAndParticleCharges_;
+};
 
 }  // namespace inviwo

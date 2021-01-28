@@ -33,8 +33,9 @@
 
 namespace inviwo {
 
-MolecularChargeTransitionsModule::MolecularChargeTransitionsModule(InviwoApplication* app) : 
-    InviwoModule(app, "MolecularChargeTransitions"), pythonFolderObserver_{ app, getPath() + "/src/processors", *this } {
+MolecularChargeTransitionsModule::MolecularChargeTransitionsModule(InviwoApplication* app)
+    : InviwoModule(app, "MolecularChargeTransitions")
+    , pythonFolderObserver_{app, getPath() + "/src/processors", *this} {
     // Add a directory to the search path of the Shadermanager
     // ShaderManager::getPtr()->addShaderSearchPath(getPath(ModulePath::GLSL));
 
@@ -60,7 +61,8 @@ MolecularChargeTransitionsModule::MolecularChargeTransitionsModule(InviwoApplica
     // registerPort<MolecularChargeTransitionsInport>();
 
     // PropertyWidgets
-    // registerPropertyWidget<MolecularChargeTransitionsPropertyWidget, MolecularChargeTransitionsProperty>("Default");
+    // registerPropertyWidget<MolecularChargeTransitionsPropertyWidget,
+    // MolecularChargeTransitionsProperty>("Default");
 
     // Dialogs
     // registerDialog<MolecularChargeTransitionsDialog>(MolecularChargeTransitionsOutport);
@@ -70,8 +72,8 @@ MolecularChargeTransitionsModule::MolecularChargeTransitionsModule(InviwoApplica
     // registerSettings(std::make_unique<MolecularChargeTransitionsSettings>());
     // registerMetaData(std::make_unique<MolecularChargeTransitionsMetaData>());
     // registerPortInspector("MolecularChargeTransitionsOutport", "path/workspace.inv");
-    // registerProcessorWidget(std::string processorClassName, std::unique_ptr<ProcessorWidget> processorWidget); 
-    // registerDrawer(util::make_unique_ptr<MolecularChargeTransitionsDrawer>());
+    // registerProcessorWidget(std::string processorClassName, std::unique_ptr<ProcessorWidget>
+    // processorWidget); registerDrawer(util::make_unique_ptr<MolecularChargeTransitionsDrawer>());
 }
 
 }  // namespace inviwo

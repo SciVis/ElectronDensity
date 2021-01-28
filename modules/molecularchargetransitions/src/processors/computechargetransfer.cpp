@@ -31,98 +31,104 @@
 
 namespace inviwo {
 
-	// The Class Identifier has to be globally unique. Use a reverse DNS naming scheme
-	const ProcessorInfo ComputeChargeTransfer::processorInfo_{
-		"org.inviwo.ComputeChargeTransfer",      // Class identifier
-		"Compute Charge Transfer",               // Display name
-		"Undefined",							 // Category
-		CodeState::Experimental,				 // Code state
-		Tags::None,								 // Tags
-	};
-	const ProcessorInfo ComputeChargeTransfer::getProcessorInfo() const { return processorInfo_; }
+// The Class Identifier has to be globally unique. Use a reverse DNS naming scheme
+const ProcessorInfo ComputeChargeTransfer::processorInfo_{
+    "org.inviwo.ComputeChargeTransfer",  // Class identifier
+    "Compute Charge Transfer",           // Display name
+    "Undefined",                         // Category
+    CodeState::Experimental,             // Code state
+    Tags::None,                          // Tags
+};
+const ProcessorInfo ComputeChargeTransfer::getProcessorInfo() const { return processorInfo_; }
 
-	ComputeChargeTransfer::ComputeChargeTransfer()
-		: Processor()
-		, holeCharges_("holeCharges")
-		, particleCharges_("particleCharges")
-		, chargeDifference_("chargeDifference")
-		, chargeTransfer_("chargeTransfer")
-		, holeAndParticleCharges_("holeAndParticleCharges") {
+ComputeChargeTransfer::ComputeChargeTransfer()
+    : Processor()
+    , holeCharges_("holeCharges")
+    , particleCharges_("particleCharges")
+    , chargeDifference_("chargeDifference")
+    , chargeTransfer_("chargeTransfer")
+    , holeAndParticleCharges_("holeAndParticleCharges") {
 
-		addPort(holeCharges_);
-		addPort(particleCharges_);
-		addPort(chargeDifference_);
-		addPort(chargeTransfer_);
-		addPort(holeAndParticleCharges_);
-	}
+    addPort(holeCharges_);
+    addPort(particleCharges_);
+    addPort(chargeDifference_);
+    addPort(chargeTransfer_);
+    addPort(holeAndParticleCharges_);
+}
 
-	void ComputeChargeTransfer::process() {
+void ComputeChargeTransfer::process() {
 
-		const auto holeCharges = holeCharges_.getData()->getColumn("charge_sg")
-			->getBuffer()
-			->getRepresentation<BufferRAM>()
-			->dispatch<std::vector<float>, dispatching::filter::Scalars>([](auto buf) {
-			auto& data = buf->getDataContainer();
-			std::vector<float> dst(data.size(), 0.0f);
-			std::transform(data.begin(), data.end(), dst.begin(),
-				[&](auto v) { return static_cast<float>(v); });
-			return dst;
-				});
+    const auto holeCharges =
+        holeCharges_.getData()
+            ->getColumn("charge_sg")
+            ->getBuffer()
+            ->getRepresentation<BufferRAM>()
+            ->dispatch<std::vector<float>, dispatching::filter::Scalars>([](auto buf) {
+                auto& data = buf->getDataContainer();
+                std::vector<float> dst(data.size(), 0.0f);
+                std::transform(data.begin(), data.end(), dst.begin(),
+                               [&](auto v) { return static_cast<float>(v); });
+                return dst;
+            });
 
-		const auto particleCharges = particleCharges_.getData()->getColumn("charge_sg")
-			->getBuffer()
-			->getRepresentation<BufferRAM>()
-			->dispatch<std::vector<float>, dispatching::filter::Scalars>([](auto buf) {
-			auto& data = buf->getDataContainer();
-			std::vector<float> dst(data.size(), 0.0f);
-			std::transform(data.begin(), data.end(), dst.begin(),
-				[&](auto v) { return static_cast<float>(v); });
-			return dst;
-				});
+    const auto particleCharges =
+        particleCharges_.getData()
+            ->getColumn("charge_sg")
+            ->getBuffer()
+            ->getRepresentation<BufferRAM>()
+            ->dispatch<std::vector<float>, dispatching::filter::Scalars>([](auto buf) {
+                auto& data = buf->getDataContainer();
+                std::vector<float> dst(data.size(), 0.0f);
+                std::transform(data.begin(), data.end(), dst.begin(),
+                               [&](auto v) { return static_cast<float>(v); });
+                return dst;
+            });
 
-		if (holeCharges.size() != particleCharges.size()) {
-			throw Exception("Unexpected dimension missmatch", IVW_CONTEXT);
-		}
-		if (holeCharges.size() == 0) {
-			throw Exception("No input charges", IVW_CONTEXT);
-		}
+    if (holeCharges.size() != particleCharges.size()) {
+        throw Exception("Unexpected dimension missmatch", IVW_CONTEXT);
+    }
+    if (holeCharges.size() == 0) {
+        throw Exception("No input charges", IVW_CONTEXT);
+    }
 
-		const auto [chargeTransfer, chargeDifference] =
-			ChargeTransferMatrix::computeTransposedChargeTransferAndChargeDifference(holeCharges, particleCharges);
+    const auto [chargeTransfer, chargeDifference] =
+        ChargeTransferMatrix::computeTransposedChargeTransferAndChargeDifference(holeCharges,
+                                                                                 particleCharges);
 
-		const auto n = holeCharges.size();
+    const auto n = holeCharges.size();
 
-		auto chargeDiffDataFrame = std::make_shared<DataFrame>(static_cast<glm::u32>(n));
-		auto& col1 = chargeDiffDataFrame->addColumn<float>("Charge difference", n)
-			->getTypedBuffer()
-			->getEditableRAMRepresentation()
-			->getDataContainer();
+    auto chargeDiffDataFrame = std::make_shared<DataFrame>(static_cast<glm::u32>(n));
+    auto& col1 = chargeDiffDataFrame->addColumn<float>("Charge difference", n)
+                     ->getTypedBuffer()
+                     ->getEditableRAMRepresentation()
+                     ->getDataContainer();
 
-		auto chargeTransferDataFrame = std::make_shared<DataFrame>(static_cast<glm::u32>(n));
-		for (auto i = 0; i < n; i++) {
-			col1[i] = chargeDifference[i];
-			auto& col = chargeTransferDataFrame->addColumn<float>(toString(i + 1), n)
-				->getTypedBuffer()
-				->getEditableRAMRepresentation()
-				->getDataContainer();
-			// This charge transfer matrix is the on the form "vector of columns"
-			col = chargeTransfer[i];
-		}
+    auto chargeTransferDataFrame = std::make_shared<DataFrame>(static_cast<glm::u32>(n));
+    for (auto i = 0; i < n; i++) {
+        col1[i] = chargeDifference[i];
+        auto& col = chargeTransferDataFrame->addColumn<float>(toString(i + 1), n)
+                        ->getTypedBuffer()
+                        ->getEditableRAMRepresentation()
+                        ->getDataContainer();
+        // This charge transfer matrix is the on the form "vector of columns"
+        col = chargeTransfer[i];
+    }
 
-		std::vector<float> dst;
-		std::merge(holeCharges.begin(), holeCharges.end(), particleCharges.begin(), particleCharges.end(), std::back_inserter(dst));
-		auto holeAndParticleChargesDataFrame = std::make_shared<DataFrame>(static_cast<glm::u32>(n));
-		holeAndParticleChargesDataFrame->addColumn("charges", dst);
+    std::vector<float> dst;
+    std::merge(holeCharges.begin(), holeCharges.end(), particleCharges.begin(),
+               particleCharges.end(), std::back_inserter(dst));
+    auto holeAndParticleChargesDataFrame = std::make_shared<DataFrame>(static_cast<glm::u32>(n));
+    holeAndParticleChargesDataFrame->addColumn("charges", dst);
 
-		chargeDifference_.setData(chargeDiffDataFrame);
-		chargeTransfer_.setData(chargeTransferDataFrame);
-		holeAndParticleCharges_.setData(holeAndParticleChargesDataFrame);
-	}
+    chargeDifference_.setData(chargeDiffDataFrame);
+    chargeTransfer_.setData(chargeTransferDataFrame);
+    holeAndParticleCharges_.setData(holeAndParticleChargesDataFrame);
+}
 
-	void ComputeChargeTransfer::doIfNotReady() {
-		chargeDifference_.setData(nullptr);
-		chargeTransfer_.setData(nullptr);
-		holeAndParticleCharges_.setData(nullptr);
-	}
+void ComputeChargeTransfer::doIfNotReady() {
+    chargeDifference_.setData(nullptr);
+    chargeTransfer_.setData(nullptr);
+    holeAndParticleCharges_.setData(nullptr);
+}
 
 }  // namespace inviwo

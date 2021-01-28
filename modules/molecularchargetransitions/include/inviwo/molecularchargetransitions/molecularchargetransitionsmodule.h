@@ -34,7 +34,8 @@
 
 namespace inviwo {
 
-class IVW_MODULE_MOLECULARCHARGETRANSITIONS_API MolecularChargeTransitionsModule : public InviwoModule {
+class IVW_MODULE_MOLECULARCHARGETRANSITIONS_API MolecularChargeTransitionsModule
+    : public InviwoModule {
 public:
     MolecularChargeTransitionsModule(InviwoApplication* app);
     virtual ~MolecularChargeTransitionsModule() = default;

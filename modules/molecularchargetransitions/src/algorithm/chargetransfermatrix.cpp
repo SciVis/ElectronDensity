@@ -31,48 +31,50 @@
 
 namespace inviwo {
 
-	std::pair<std::vector<std::vector<float>>, std::vector<float>>
-		ChargeTransferMatrix::computeTransposedChargeTransferAndChargeDifference(std::vector<float> holeCharges, std::vector<float> particleCharges) {
-		const auto n = holeCharges.size();
+std::pair<std::vector<std::vector<float>>, std::vector<float>>
+ChargeTransferMatrix::computeTransposedChargeTransferAndChargeDifference(
+    std::vector<float> holeCharges, std::vector<float> particleCharges) {
+    const auto n = holeCharges.size();
 
-		std::vector<std::vector<float>> chargeTransfer = {};
-		chargeTransfer.resize(n);
+    std::vector<std::vector<float>> chargeTransfer = {};
+    chargeTransfer.resize(n);
 
-		auto donors = std::vector<size_t>();
-		auto acceptors = std::vector<size_t>();
-		auto chargeDifference = std::vector<float>();
+    auto donors = std::vector<size_t>();
+    auto acceptors = std::vector<size_t>();
+    auto chargeDifference = std::vector<float>();
 
-		for (auto i = 0; i < n; i++) {
-			const auto chargeDiff = particleCharges[i] - holeCharges[i];
-			chargeDifference.push_back(chargeDiff);
+    for (auto i = 0; i < n; i++) {
+        const auto chargeDiff = particleCharges[i] - holeCharges[i];
+        chargeDifference.push_back(chargeDiff);
 
-			// Donor
-			if (chargeDiff < 0) {
-				donors.push_back(i);
-			}
-			// Acceptor
-			else {
-				acceptors.push_back(i);
-			}
-			chargeTransfer[i].resize(n);
-			chargeTransfer[i][i] = std::min(holeCharges[i], particleCharges[i]);
-		}
+        // Donor
+        if (chargeDiff < 0) {
+            donors.push_back(i);
+        }
+        // Acceptor
+        else {
+            acceptors.push_back(i);
+        }
+        chargeTransfer[i].resize(n);
+        chargeTransfer[i][i] = std::min(holeCharges[i], particleCharges[i]);
+    }
 
-		float totalAcceptorCharge = 0.0f;
-		for (auto& aIndex : acceptors) {
-			totalAcceptorCharge += chargeDifference[aIndex];
-		}
+    float totalAcceptorCharge = 0.0f;
+    for (auto& aIndex : acceptors) {
+        totalAcceptorCharge += chargeDifference[aIndex];
+    }
 
-		// Heuristic
-		for (auto& dIndex : donors) {
-			for (auto& aIndex : acceptors) {
-				// transpose of charge transfer matrix
-				chargeTransfer[dIndex][aIndex] = -chargeDifference[dIndex] *
-					(chargeDifference[aIndex] / totalAcceptorCharge);
-			}
-		}
+    // Heuristic
+    for (auto& dIndex : donors) {
+        for (auto& aIndex : acceptors) {
+            // transpose of charge transfer matrix
+            chargeTransfer[dIndex][aIndex] =
+                -chargeDifference[dIndex] * (chargeDifference[aIndex] / totalAcceptorCharge);
+        }
+    }
 
-		return std::pair<std::vector<std::vector<float>>, std::vector<float>>{chargeTransfer, chargeDifference};
-	}
+    return std::pair<std::vector<std::vector<float>>, std::vector<float>>{chargeTransfer,
+                                                                          chargeDifference};
+}
 
 }  // namespace inviwo
