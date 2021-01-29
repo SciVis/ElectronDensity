@@ -45,7 +45,7 @@ class DimensionalityReduction(ivw.Processor):
     def process(self):
         inputDataFrame = self.inport.getData()
 
-        # Get data from dataFrame
+        # Get data from data frame
         X = []
         for i in range(0, inputDataFrame.rows):
             row = []

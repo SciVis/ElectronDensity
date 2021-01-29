@@ -114,11 +114,14 @@ void ComputeChargeTransfer::process() {
         col = chargeTransfer[i];
     }
 
-    std::vector<float> dst;
-    std::merge(holeCharges.begin(), holeCharges.end(), particleCharges.begin(),
-               particleCharges.end(), std::back_inserter(dst));
+    // Concatenate hole and particle charges
+    // [ hole charge subgroup 1, ..., hole charge subgroup N,
+    //   particle charge subgroup 1, ..., particle charge subgroup N ]
+    std::vector<float> holeAndParticleCharges = holeCharges;
+    holeAndParticleCharges.insert(holeAndParticleCharges.end(), particleCharges.begin(),
+                                  particleCharges.end());
     auto holeAndParticleChargesDataFrame = std::make_shared<DataFrame>(static_cast<glm::u32>(n));
-    holeAndParticleChargesDataFrame->addColumn("charges", dst);
+    holeAndParticleChargesDataFrame->addColumn("charges", holeAndParticleCharges);
 
     chargeDifference_.setData(chargeDiffDataFrame);
     chargeTransfer_.setData(chargeTransferDataFrame);
