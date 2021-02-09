@@ -52,7 +52,8 @@ for file in fileNames:
         
     holeAndParticleCharges = chargeTransferProcessor.outports[2].getData()
     chargeDifference = chargeTransferProcessor.outports[0].getData()
-    
+    chargeTransfer = chargeTransferProcessor.outports[1].getData()
+
     if holeAndParticleCharges == None or chargeDifference == None : 
         print("Error, no data in outport(s) (None), " + file[4] + ", " + file[0])
         exit()
@@ -64,21 +65,32 @@ for file in fileNames:
     row.append(file[4])
     # State
     row.append(file[0])
+
+    # Hole and particle charges
     for i in range(0, 2*nrSubgroups):
         row.append(holeAndParticleCharges[1].get(i)) 
-
+    
+    # Charge difference
     for j in range(0, nrSubgroups):
         row.append(chargeDifference[1].get(j))        
-
+    
+    # Charge transfer matrix (row-wise)
+    for k in range(0, nrSubgroups):
+        for l in range(1, nrSubgroups+1):
+            row.append(chargeTransfer[l].get(k))
+    
     dataResult.append(row)
 
 holeNames = []
 particleNames = []
 diffNames = []
-for k in range(0, nrSubgroups): 
-    holeNames.append("Hole sg" + str(k+1))
-    particleNames.append("Particle sg" + str(k+1))
-    diffNames.append("Diff sg" + str(k+1))
+chargeTransferNames = []
+for m in range(1, nrSubgroups+1): 
+    holeNames.append("Hole sg" + str(m))
+    particleNames.append("Particle sg" + str(m))
+    diffNames.append("Diff sg" + str(m))
+    for ind1, ind2 in zip([m]*nrSubgroups, range(1,nrSubgroups+1)):
+        chargeTransferNames.append("Charge transfer " + str(ind1) + str(ind2))
 
 header = []
 header.append("Name")
@@ -86,8 +98,9 @@ header.append("State")
 header.extend(holeNames)
 header.extend(particleNames)
 header.extend(diffNames)
+header.extend(chargeTransferNames)
 
-with open(data_folder + 'results_withDifference2.csv', 'w', newline='') as resultsFile:
+with open(data_folder + 'results_withDifference_withChargeTransfer.csv', 'w', newline='') as resultsFile:
     writer = csv.writer(resultsFile)
     writer.writerow(header)
     writer.writerows(dataResult)

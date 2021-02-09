@@ -42,8 +42,11 @@ class ParameterSource(ivw.Processor):
         oscillatoryStrength = []
         rotatoryStrength = []
         for i in range(0, len(lines)):
-            splitted = lines[i].strip().split(" ")
+            splitted = lines[i].strip('\"').strip().split(" ")
             splitted[:] = [x for x in splitted if x]
+            
+            if len(splitted) == 0:
+                continue
 
             name.append(splitted[0].strip())
             energyEv.append(float(splitted[1].strip()))
