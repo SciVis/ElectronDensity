@@ -121,4 +121,20 @@ TEST(
                      /*particleCharges*/ std::vector<float>{0.2f, 0.3f, 0.5f}),
                  inviwo::Exception);
 }
+
+TEST(MolecularChargeTransitions,
+     ComputeTransposedChargeTransferAndChargeDifference_NoAcceptors_ThrowsException) {
+    EXPECT_THROW(ChargeTransferMatrix::computeTransposedChargeTransferAndChargeDifference(
+                     /*holeCharges*/ std::vector<float>{1.0f, 1.0f},
+                     /*particleCharges*/ std::vector<float>{0.5f, 0.5f}),
+                 inviwo::Exception);
+}
+
+TEST(MolecularChargeTransitions,
+     ComputeTransposedChargeTransferAndChargeDifference_NoDonors_ThrowsException) {
+    EXPECT_THROW(ChargeTransferMatrix::computeTransposedChargeTransferAndChargeDifference(
+                     /*holeCharges*/ std::vector<float>{0.5f, 0.5f},
+                     /*particleCharges*/ std::vector<float>{1.0f, 1.0f}),
+                 inviwo::Exception);
+}
 }  // namespace inviwo

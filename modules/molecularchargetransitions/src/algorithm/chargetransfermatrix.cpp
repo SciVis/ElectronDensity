@@ -34,8 +34,18 @@ namespace inviwo {
 std::pair<std::vector<std::vector<float>>, std::vector<float>>
 ChargeTransferMatrix::computeTransposedChargeTransferAndChargeDifference(
     std::vector<float> holeCharges, std::vector<float> particleCharges) {
-    const auto n = holeCharges.size();
 
+    if (holeCharges.size() == 0 || particleCharges.size() == 0) {
+        throw Exception("Empty particle and/or hole charges.",
+                        IVW_CONTEXT_CUSTOM("ComputeChargeTransfer"));
+    }
+
+    if (holeCharges.size() != particleCharges.size()) {
+        throw Exception("Particle and hole charges not same size.",
+                        IVW_CONTEXT_CUSTOM("ComputeChargeTransfer"));
+    }
+
+    const auto n = holeCharges.size();
     std::vector<std::vector<float>> chargeTransfer = {};
     chargeTransfer.resize(n);
 
@@ -57,6 +67,11 @@ ChargeTransferMatrix::computeTransposedChargeTransferAndChargeDifference(
         }
         chargeTransfer[i].resize(n);
         chargeTransfer[i][i] = std::min(holeCharges[i], particleCharges[i]);
+    }
+
+    if (donors.size() == 0 || acceptors.size() == 0) {
+        throw Exception("No acceptors and/or donors (not valid).",
+                        IVW_CONTEXT_CUSTOM("ComputeChargeTransfer"));
     }
 
     float totalAcceptorCharge = 0.0f;
