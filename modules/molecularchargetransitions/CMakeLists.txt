@@ -23,6 +23,7 @@ set(SHADER_FILES
 ivw_group("Shader Files" ${SHADER_FILES})
 
 set(TEST_FILES
+    tests/unittests/charge-transfer-matrix-test.cpp
     tests/unittests/molecularchargetransitions-unittest-main.cpp
 )
 ivw_add_unittest(${TEST_FILES})
