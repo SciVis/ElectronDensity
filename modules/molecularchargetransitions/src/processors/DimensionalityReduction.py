@@ -7,6 +7,7 @@ from sklearn.manifold import TSNE
 from sklearn.manifold import MDS
 from sklearn.manifold import Isomap
 from sklearn.decomposition import PCA
+from sklearn.decomposition import FastICA
 
 class DimensionalityReduction(ivw.Processor):
     def __init__(self, id, name):
@@ -20,7 +21,8 @@ class DimensionalityReduction(ivw.Processor):
             "dim_reduction", "Dim. red. technique", [ivw.properties.StringOption("tSNE", "t-SNE", "tSNE"), 
                                                      ivw.properties.StringOption("MDS", "MDS", "MDS"),
                                                      ivw.properties.StringOption("isomap", "Isomap", "isomap"),
-                                                     ivw.properties.StringOption("pca", "PCA", "pca")])
+                                                     ivw.properties.StringOption("pca", "PCA", "pca"),
+                                                     ivw.properties.StringOption("ica", "ICA", "ica")])
         self.addProperty(self.dimReduction)
         self.perplexity = ivw.properties.FloatProperty(
             "perplexity", "Perplexity", 5.0, 5.0, 50.0, 1.0)
@@ -125,6 +127,9 @@ class DimensionalityReduction(ivw.Processor):
             pca = PCA(n_components=2)
             pca.fit(X)
             X_embedded = pca.transform(X)
+        elif (self.dimReduction.value == "ica"):
+            transformer = FastICA(n_components=2)
+            X_embedded = transformer.fit_transform(X)
 
         X_transposed = np.transpose(X_embedded)
 
