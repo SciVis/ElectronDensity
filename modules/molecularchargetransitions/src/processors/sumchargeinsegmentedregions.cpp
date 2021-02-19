@@ -80,7 +80,7 @@ void SumChargeInSegmentedRegions::process() {
 
         // TODO: do I really need to set an initial value here?
         auto indicesToAccumulatedValue = std::unordered_map<uint16_t, float>();
-        for (auto i = static_cast<uint16_t>(range.x); i < static_cast<uint16_t>(range.y); i++) {
+        for (auto i = static_cast<uint16_t>(range.x); i <= static_cast<uint16_t>(range.y); i++) {
             indicesToAccumulatedValue.emplace(i, 0.0);
         }
 
