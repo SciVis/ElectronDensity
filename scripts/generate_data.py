@@ -9,7 +9,7 @@ t0 = time.time()
 
 app = inviwopy.app
 network = app.network
-data_folder = "C:/Users/sigsi52/Development/Inviwo/ElectronDensity/data/tq/"
+data_folder = "C:/Users/sigsi52/Development/Inviwo/ElectronDensity/data/serie/"
 
 # Read metadata file
 f = open(data_folder + "metadata.csv", mode='r')
@@ -23,6 +23,10 @@ for i in range(1, len(lines)):
 dataResult = []
 nrSubgroups = 0
 for file in fileNames:
+    # If should skip state...
+    #if file[0] == "State 10":
+    #    continue
+
     # lock
     app.network.lock()  
 
@@ -42,14 +46,18 @@ for file in fileNames:
 
     # unlock
     app.network.unlock()
+     
+    #inviwo_utils.update() # Needed for canvas to update
 
-    # wait?
-    
-    inviwo_utils.update() # Needed for canvas to update
+    # To make sure processor (voronoi) is finished
+    inviwopy.qt.update()    
+    #app.waitForPool()
+    while app.network.runningBackgroundJobs > 0:
+        inviwopy.qt.update()
 
     # Result
     chargeTransferProcessor = network.ComputeChargeTransfer
-        
+
     holeAndParticleCharges = chargeTransferProcessor.outports[2].getData()
     chargeDifference = chargeTransferProcessor.outports[0].getData()
     chargeTransfer = chargeTransferProcessor.outports[1].getData()
@@ -100,7 +108,7 @@ header.extend(particleNames)
 header.extend(diffNames)
 header.extend(chargeTransferNames)
 
-with open(data_folder + 'results_withDifference_withChargeTransfer.csv', 'w', newline='') as resultsFile:
+with open(data_folder + 'results2.csv', 'w', newline='') as resultsFile:
     writer = csv.writer(resultsFile)
     writer.writerow(header)
     writer.writerows(dataResult)
