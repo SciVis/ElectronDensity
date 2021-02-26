@@ -11,6 +11,9 @@ class CreateAverageChargeTransferDiagram(ivw.Processor):
         self.dataFrame = df.DataFrameInport("dataFrame")
         self.addInport(self.dataFrame, owner=False)
 
+        self.saveFilesCheckbox = ivw.properties.BoolProperty("save_files", "Save files", False)
+        self.addProperty(self.saveFilesCheckbox)
+
     @staticmethod
     def processorInfo():
         return ivw.ProcessorInfo(
@@ -31,40 +34,44 @@ class CreateAverageChargeTransferDiagram(ivw.Processor):
         print("process")
         inputDataFrame = self.dataFrame.getData()
 
-        # Get data from data frame
-        holeCharges = []
-        particleCharges = []
-        clusters = []
-        for i in range(0, inputDataFrame.rows):
-            meanHole = []
-            meanParticle = []
-            for j in range(0, inputDataFrame.cols):
-                header = inputDataFrame.column(j).header.lower()
-                if ("mean hole" in header):
-                    meanHole.append(inputDataFrame.column(j).get(i))
-                if ("mean particle" in header):
-                    meanParticle.append(inputDataFrame.column(j).get(i))
-                if (header == "cluster"):
-                    clusters.append(inputDataFrame.column(j).get(i))
-            holeCharges.append(meanHole)
-            particleCharges.append(meanParticle)
+        if (self.saveFilesCheckbox.value == True):
+            # Get data from data frame
+            holeCharges = []
+            particleCharges = []
+            clusters = []
+            clusterSizes = []
+            for i in range(0, inputDataFrame.rows):
+                meanHole = []
+                meanParticle = []
+                for j in range(0, inputDataFrame.cols):
+                    header = inputDataFrame.column(j).header.lower()
+                    if ("mean hole" in header):
+                        meanHole.append(inputDataFrame.column(j).get(i))
+                    if ("mean particle" in header):
+                        meanParticle.append(inputDataFrame.column(j).get(i))
+                    if (header == "cluster"):
+                        clusters.append(inputDataFrame.column(j).get(i))
+                    if (header == "cluster size"):
+                        clusterSizes.append(inputDataFrame.column(j).get(i))
+                holeCharges.append(meanHole)
+                particleCharges.append(meanParticle)
 
-        #print("len holeCharges", len(holeCharges))
-        #print("len particleCharges", len(particleCharges))
+            #print("len holeCharges", len(holeCharges))
+            #print("len particleCharges", len(particleCharges))
 
-        for k in range(0, len(holeCharges)):
-            #print("len holeCharges[k]", len(holeCharges[k]))
-            subgroup_names = range(1, len(holeCharges[k])+1)
+            for k in range(0, len(holeCharges)):
+                #print("len holeCharges[k]", len(holeCharges[k]))
+                subgroup_names = range(1, len(holeCharges[k])+1)
 
-            atom_subgroup_map = range(len(holeCharges[k]))
-            subgroup_info = tau.SubgroupInfo()
-            subgroup_info.set_subgroups(subgroup_names, atom_subgroup_map)
+                atom_subgroup_map = range(len(holeCharges[k]))
+                subgroup_info = tau.SubgroupInfo()
+                subgroup_info.set_subgroups(subgroup_names, atom_subgroup_map)
 
-            transition = types.SimpleNamespace()
-            transition.hole_charges =  holeCharges[k]
-            transition.particle_charges = particleCharges[k]
+                transition = types.SimpleNamespace()
+                transition.hole_charges =  holeCharges[k]
+                transition.particle_charges = particleCharges[k]
 
-            tau.compute_subgroup_charges(transition, subgroup_info)
+                tau.compute_subgroup_charges(transition, subgroup_info)
 
-            tau.create_diagram(subgroup_info, title="Mean, cluster " + str(clusters[k]), show_plot=False, save_plot=True, file_name="C:/Users/sigsi52/Development/Inviwo/ElectronDensity/data/results/plots/meanChargeTransferPlot" + str(clusters[k]) + ".png")
-            print(subgroup_info)
+                tau.create_diagram(subgroup_info, title="Mean, cluster " + str(clusters[k]), info="Cluster size: " + str(clusterSizes[k]), show_plot=False, save_plot=True, file_name="C:/Users/sigsi52/Development/Inviwo/ElectronDensity/data/results/plots/meanChargeTransferPlot" + str(clusters[k]) + ".png")
+                #print(subgroup_info)
