@@ -61,6 +61,14 @@ public:
     static const ProcessorInfo processorInfo_;
 
 private:
+    struct ClusterStatisticsStruct {
+        std::vector<float> min;
+        std::vector<float> max;
+        std::vector<float> diff;
+        std::vector<float> mean;
+        std::vector<float> stdev;
+    };
+
     DataFrameInport inport_;
     DataFrameOutport outport_;
     DataFrameOutport diffOutport_;

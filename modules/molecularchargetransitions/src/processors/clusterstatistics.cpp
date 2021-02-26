@@ -148,17 +148,8 @@ void ClusterStatistics::process() {
 
     std::vector<int> clusterNr = {};
     std::vector<size_t> clusterSize = {};
-    // TODO: put these into some shared data structure...
-    std::unordered_map<int, std::vector<float>> subgroupToHoleCharges_min;
-    std::unordered_map<int, std::vector<float>> subgroupToHoleCharges_max;
-    std::unordered_map<int, std::vector<float>> subgroupToHoleCharges_diff;
-    std::unordered_map<int, std::vector<float>> subgroupToHoleCharges_stdev;
-    std::unordered_map<int, std::vector<float>> subgroupToHoleCharges_mean;
-    std::unordered_map<int, std::vector<float>> subgroupToParticleCharges_min;
-    std::unordered_map<int, std::vector<float>> subgroupToParticleCharges_max;
-    std::unordered_map<int, std::vector<float>> subgroupToParticleCharges_diff;
-    std::unordered_map<int, std::vector<float>> subgroupToParticleCharges_stdev;
-    std::unordered_map<int, std::vector<float>> subgroupToParticleCharges_mean;
+    std::unordered_map<int, ClusterStatisticsStruct> subgroupToClusterStatistics_hole = {};
+    std::unordered_map<int, ClusterStatisticsStruct> subgroupToClusterStatistics_particle = {};
 
     for (auto&& c : clusterNrToIndex) {
         clusterNr.push_back(c.first);
@@ -176,59 +167,69 @@ void ClusterStatistics::process() {
 
             // Min, max, mean and standard deviation for hole and particle
             const auto minHole =
-                std::min_element(holeChargesForCluster.cbegin(), holeChargesForCluster.cend());
+                *std::min_element(holeChargesForCluster.cbegin(), holeChargesForCluster.cend());
             const auto maxHole =
-                std::max_element(holeChargesForCluster.cbegin(), holeChargesForCluster.cend());
-            const auto minParticle = std::min_element(particleChargesForCluster.cbegin(),
-                                                      particleChargesForCluster.cend());
-            const auto maxParticle = std::max_element(particleChargesForCluster.cbegin(),
-                                                      particleChargesForCluster.cend());
+                *std::max_element(holeChargesForCluster.cbegin(), holeChargesForCluster.cend());
+            const auto minParticle = *std::min_element(particleChargesForCluster.cbegin(),
+                                                       particleChargesForCluster.cend());
+            const auto maxParticle = *std::max_element(particleChargesForCluster.cbegin(),
+                                                       particleChargesForCluster.cend());
             const auto meanHole = meanValue(holeChargesForCluster);
             const auto stDevHole = standardDeviation(holeChargesForCluster, meanHole);
             const auto meanParticle = meanValue(particleChargesForCluster);
             const auto stDevParticle = standardDeviation(particleChargesForCluster, meanParticle);
 
-            if (subgroupToHoleCharges_min.empty()) {
-                subgroupToHoleCharges_min.emplace(i, std::vector<float>{*minHole});
-                subgroupToHoleCharges_max.emplace(i, std::vector<float>{*maxHole});
-                subgroupToHoleCharges_diff.emplace(i, std::vector<float>{(*maxHole - *minHole)});
-                subgroupToHoleCharges_mean.emplace(i, std::vector<float>{meanHole});
-                subgroupToHoleCharges_stdev.emplace(i, std::vector<float>{stDevHole});
-                subgroupToParticleCharges_min.emplace(i, std::vector<float>{*minParticle});
-                subgroupToParticleCharges_max.emplace(i, std::vector<float>{*maxParticle});
-                subgroupToParticleCharges_diff.emplace(
-                    i, std::vector<float>{(*maxParticle - *minParticle)});
-                subgroupToParticleCharges_mean.emplace(i, std::vector<float>{meanParticle});
-                subgroupToParticleCharges_stdev.emplace(i, std::vector<float>{stDevParticle});
+            if (subgroupToClusterStatistics_hole.empty() &&
+                subgroupToClusterStatistics_particle.empty()) {
+
+                auto statsHole = ClusterStatisticsStruct();
+                statsHole.min = std::vector<float>{minHole};
+                statsHole.max = std::vector<float>{maxHole};
+                statsHole.diff = std::vector<float>{(maxHole - minHole)};
+                statsHole.mean = std::vector<float>{meanHole};
+                statsHole.stdev = std::vector<float>{stDevHole};
+                subgroupToClusterStatistics_hole.emplace(i, statsHole);
+
+                auto statsParticle = ClusterStatisticsStruct();
+                statsParticle.min = std::vector<float>{minParticle};
+                statsParticle.max = std::vector<float>{maxParticle};
+                statsParticle.diff = std::vector<float>{(maxParticle - minParticle)};
+                statsParticle.mean = std::vector<float>{meanParticle};
+                statsParticle.stdev = std::vector<float>{stDevParticle};
+                subgroupToClusterStatistics_particle.emplace(i, statsParticle);
             } else {
-                auto& it = subgroupToHoleCharges_min.find(i);
+                auto& itHole = subgroupToClusterStatistics_hole.find(i);
+                auto& itParticle = subgroupToClusterStatistics_particle.find(i);
 
-                if (it != subgroupToHoleCharges_min.cend()) {
-                    it->second.push_back(*minHole);
+                if (itHole != subgroupToClusterStatistics_hole.cend() &&
+                    itParticle != subgroupToClusterStatistics_particle.cend()) {
 
-                    subgroupToHoleCharges_max.find(i)->second.push_back(*maxHole);
-                    subgroupToHoleCharges_diff.find(i)->second.push_back((*maxHole - *minHole));
-                    subgroupToHoleCharges_mean.find(i)->second.push_back(meanHole);
-                    subgroupToHoleCharges_stdev.find(i)->second.push_back(stDevHole);
-                    subgroupToParticleCharges_min.find(i)->second.push_back(*minParticle);
-                    subgroupToParticleCharges_max.find(i)->second.push_back(*maxParticle);
-                    subgroupToParticleCharges_diff.find(i)->second.push_back(
-                        (*maxParticle - *minParticle));
-                    subgroupToParticleCharges_mean.find(i)->second.push_back(meanParticle);
-                    subgroupToParticleCharges_stdev.find(i)->second.push_back(stDevParticle);
+                    itHole->second.min.push_back(minHole);
+                    itHole->second.max.push_back(maxHole);
+                    itHole->second.diff.push_back((maxHole - minHole));
+                    itHole->second.mean.push_back(meanHole);
+                    itHole->second.stdev.push_back(stDevHole);
+                    itParticle->second.min.push_back(minParticle);
+                    itParticle->second.max.push_back(maxParticle);
+                    itParticle->second.diff.push_back((maxParticle - minParticle));
+                    itParticle->second.mean.push_back(meanParticle);
+                    itParticle->second.stdev.push_back(stDevParticle);
                 } else {
-                    subgroupToHoleCharges_min.emplace(i, std::vector<float>{*minHole});
-                    subgroupToHoleCharges_max.emplace(i, std::vector<float>{*maxHole});
-                    subgroupToHoleCharges_diff.emplace(i,
-                                                       std::vector<float>{(*maxHole - *minHole)});
-                    subgroupToHoleCharges_mean.emplace(i, std::vector<float>{meanHole});
-                    subgroupToHoleCharges_stdev.emplace(i, std::vector<float>{stDevHole});
-                    subgroupToParticleCharges_min.emplace(i, std::vector<float>{*minParticle});
-                    subgroupToParticleCharges_max.emplace(i, std::vector<float>{*maxParticle});
-                    subgroupToParticleCharges_diff.emplace(
-                        i, std::vector<float>{(*maxParticle - *minParticle)});
-                    subgroupToParticleCharges_mean.emplace(i, std::vector<float>{meanParticle});
-                    subgroupToParticleCharges_stdev.emplace(i, std::vector<float>{stDevParticle});
+                    auto statsHole = ClusterStatisticsStruct();
+                    statsHole.min = std::vector<float>{minHole};
+                    statsHole.max = std::vector<float>{maxHole};
+                    statsHole.diff = std::vector<float>{(maxHole - minHole)};
+                    statsHole.mean = std::vector<float>{meanHole};
+                    statsHole.stdev = std::vector<float>{stDevHole};
+                    subgroupToClusterStatistics_hole.emplace(i, statsHole);
+
+                    auto statsParticle = ClusterStatisticsStruct();
+                    statsParticle.min = std::vector<float>{minParticle};
+                    statsParticle.max = std::vector<float>{maxParticle};
+                    statsParticle.diff = std::vector<float>{(maxParticle - minParticle)};
+                    statsParticle.mean = std::vector<float>{meanParticle};
+                    statsParticle.stdev = std::vector<float>{stDevParticle};
+                    subgroupToClusterStatistics_particle.emplace(i, statsParticle);
                 }
             }
         }
@@ -249,27 +250,25 @@ void ClusterStatistics::process() {
 
     for (size_t i = 0; i < nrSubgroups; i++) {
         dataFrame->addColumn("Min hole charge sg " + std::to_string(i + 1),
-                             subgroupToHoleCharges_min[i]);
+                             subgroupToClusterStatistics_hole[i].min);
         dataFrame->addColumn("Max hole charge sg " + std::to_string(i + 1),
-                             subgroupToHoleCharges_max[i]);
+                             subgroupToClusterStatistics_hole[i].max);
         dataFrame->addColumn("Min particle charge sg " + std::to_string(i + 1),
-                             subgroupToParticleCharges_min[i]);
+                             subgroupToClusterStatistics_particle[i].min);
         dataFrame->addColumn("Max particle charge sg " + std::to_string(i + 1),
-                             subgroupToParticleCharges_max[i]);
-
+                             subgroupToClusterStatistics_particle[i].max);
         diffDataFrame->addColumn("Diff hole charge sg " + std::to_string(i + 1),
-                                 subgroupToHoleCharges_diff[i]);
+                                 subgroupToClusterStatistics_hole[i].diff);
         diffDataFrame->addColumn("Diff particle charge sg " + std::to_string(i + 1),
-                                 subgroupToParticleCharges_diff[i]);
-
+                                 subgroupToClusterStatistics_particle[i].diff);
         meanDataFrame->addColumn("Mean hole charge sg " + std::to_string(i + 1),
-                                 subgroupToHoleCharges_mean[i]);
+                                 subgroupToClusterStatistics_hole[i].mean);
         meanDataFrame->addColumn("Stdev hole charge sg " + std::to_string(i + 1),
-                                 subgroupToHoleCharges_stdev[i]);
+                                 subgroupToClusterStatistics_hole[i].stdev);
         meanDataFrame->addColumn("Mean particle charge sg " + std::to_string(i + 1),
-                                 subgroupToParticleCharges_mean[i]);
+                                 subgroupToClusterStatistics_particle[i].mean);
         meanDataFrame->addColumn("Stdev particle charge sg " + std::to_string(i + 1),
-                                 subgroupToParticleCharges_stdev[i]);
+                                 subgroupToClusterStatistics_particle[i].stdev);
     }
 
     outport_.setData(dataFrame);
