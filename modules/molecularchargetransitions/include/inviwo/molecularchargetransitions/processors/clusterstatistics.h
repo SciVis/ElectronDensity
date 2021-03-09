@@ -67,6 +67,7 @@ private:
         std::vector<float> diff;
         std::vector<float> mean;
         std::vector<float> stdev;
+        std::vector<float> variance;
     };
 
     DataFrameInport inport_;
