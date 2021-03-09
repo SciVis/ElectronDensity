@@ -27,55 +27,40 @@
  *
  *********************************************************************************/
 
-#pragma once
-
-#include <inviwo/molecularchargetransitions/molecularchargetransitionsmoduledefine.h>
-#include <inviwo/core/processors/processor.h>
-#include <inviwo/core/properties/ordinalproperty.h>
-#include <inviwo/dataframe/datastructures/dataframe.h>
+#include <warn/push>
+#include <warn/ignore/all>
+#include <gtest/gtest.h>
+#include <warn/pop>
+#include <vector>
 #include <inviwo/molecularchargetransitions/algorithm/statistics.h>
 
 namespace inviwo {
 
-/** \docpage{org.inviwo.ClusterStatistics, Cluster Statistics}
- * ![](org.inviwo.ClusterStatistics.png?classIdentifier=org.inviwo.ClusterStatistics)
- * Explanation of how to use the processor.
- *
- * ### Inports
- *   * __<Inport1>__ <description>.
- *
- * ### Outports
- *   * __<Outport1>__ <description>.
- *
- * ### Properties
- *   * __<Prop1>__ <description>.
- *   * __<Prop2>__ <description>
- */
-class IVW_MODULE_MOLECULARCHARGETRANSITIONS_API ClusterStatistics : public Processor {
-public:
-    ClusterStatistics();
-    virtual ~ClusterStatistics() = default;
+TEST(MolecularChargeTransitions, Mean_VectorWithTwoElements_CalculatesCorrectly) {
+    auto v = std::vector<float>{8.0f, 10.0f};
+    auto mean = Statistics::meanValue(v);
 
-    virtual void process() override;
+    EXPECT_FLOAT_EQ(9.0f, mean);
+}
 
-    virtual const ProcessorInfo getProcessorInfo() const override;
-    static const ProcessorInfo processorInfo_;
+TEST(MolecularChargeTransitions, Variance_VectorWithTwoElements_CalculatesCorrectly) {
+    auto v = std::vector<float>{8.0f, 10.0f};
+    auto var = Statistics::variance(v, 9.0f);
 
-private:
-    struct ClusterStatisticsStruct {
-        std::vector<float> min;
-        std::vector<float> max;
-        std::vector<float> diff;
-        std::vector<float> mean;
-        std::vector<float> stdev;
-        std::vector<float> variance;
-    };
+    EXPECT_FLOAT_EQ(1.0f, var);
+}
+TEST(MolecularChargeTransitions, Mean_VectorWithThreeElements_CalculatesCorrectly) {
+    auto v = std::vector<float>{8.0f, 10.0f, 15.0f};
+    auto mean = Statistics::meanValue(v);
 
-    DataFrameInport inport_;
-    DataFrameOutport outport_;
-    DataFrameOutport diffOutport_;
-    DataFrameOutport meanOutport_;
-    IntProperty nrSubgroups_;
-};
+    EXPECT_FLOAT_EQ(11.0f, mean);
+}
+
+TEST(MolecularChargeTransitions, Variance_VectorWithThreeElements_CalculatesCorrectly) {
+    auto v = std::vector<float>{8.0f, 10.0f, 15.0f};
+    auto var = Statistics::variance(v, 11.0f);
+
+    EXPECT_FLOAT_EQ(8.66667f, var);
+}
 
 }  // namespace inviwo

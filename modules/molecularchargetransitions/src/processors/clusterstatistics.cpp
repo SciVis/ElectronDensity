@@ -56,16 +56,6 @@ ClusterStatistics::ClusterStatistics()
     addProperty(nrSubgroups_);
 }
 
-float meanValue(const std::vector<float>& values) {
-    const auto sum = std::accumulate(values.begin(), values.end(), 0.0f);
-    return sum / values.size();
-}
-
-float standardDeviation(const std::vector<float>& values, const float& mean) {
-    const auto sqSum = std::inner_product(values.begin(), values.end(), values.begin(), 0.0f);
-    return std::sqrt(sqSum / values.size() - mean * mean);
-}
-
 void ClusterStatistics::process() {
     auto iCol = inport_.getData()->getIndexColumn();
     auto& indexCol = iCol->getTypedBuffer()->getRAMRepresentation()->getDataContainer();
@@ -165,7 +155,7 @@ void ClusterStatistics::process() {
                 particleChargesForCluster.push_back(particleCharges[i][ind]);
             }
 
-            // Min, max, mean and standard deviation for hole and particle
+            // Min, max, mean and variance for hole and particle subgroups
             const auto minHole =
                 *std::min_element(holeChargesForCluster.cbegin(), holeChargesForCluster.cend());
             const auto maxHole =
@@ -174,12 +164,11 @@ void ClusterStatistics::process() {
                                                        particleChargesForCluster.cend());
             const auto maxParticle = *std::max_element(particleChargesForCluster.cbegin(),
                                                        particleChargesForCluster.cend());
-            const auto meanHole = meanValue(holeChargesForCluster);
-            const auto stDevHole = standardDeviation(holeChargesForCluster, meanHole);
-            const auto varianceHole = stDevHole * stDevHole;
-            const auto meanParticle = meanValue(particleChargesForCluster);
-            const auto stDevParticle = standardDeviation(particleChargesForCluster, meanParticle);
-            const auto varianceParticle = stDevParticle * stDevParticle;
+            const auto meanHole = Statistics::meanValue(holeChargesForCluster);
+            const auto varianceHole = Statistics::variance(holeChargesForCluster, meanHole);
+            const auto meanParticle = Statistics::meanValue(particleChargesForCluster);
+            const auto varianceParticle =
+                Statistics::variance(particleChargesForCluster, meanParticle);
 
             if (subgroupToClusterStatistics_hole.empty() &&
                 subgroupToClusterStatistics_particle.empty()) {
@@ -189,7 +178,6 @@ void ClusterStatistics::process() {
                 statsHole.max = std::vector<float>{maxHole};
                 statsHole.diff = std::vector<float>{(maxHole - minHole)};
                 statsHole.mean = std::vector<float>{meanHole};
-                statsHole.stdev = std::vector<float>{stDevHole};
                 statsHole.variance = std::vector<float>{varianceHole};
                 subgroupToClusterStatistics_hole.emplace(i, statsHole);
 
@@ -198,7 +186,6 @@ void ClusterStatistics::process() {
                 statsParticle.max = std::vector<float>{maxParticle};
                 statsParticle.diff = std::vector<float>{(maxParticle - minParticle)};
                 statsParticle.mean = std::vector<float>{meanParticle};
-                statsParticle.stdev = std::vector<float>{stDevParticle};
                 statsParticle.variance = std::vector<float>{varianceParticle};
                 subgroupToClusterStatistics_particle.emplace(i, statsParticle);
             } else {
@@ -212,13 +199,11 @@ void ClusterStatistics::process() {
                     itHole->second.max.push_back(maxHole);
                     itHole->second.diff.push_back((maxHole - minHole));
                     itHole->second.mean.push_back(meanHole);
-                    itHole->second.stdev.push_back(stDevHole);
                     itHole->second.variance.push_back(varianceHole);
                     itParticle->second.min.push_back(minParticle);
                     itParticle->second.max.push_back(maxParticle);
                     itParticle->second.diff.push_back((maxParticle - minParticle));
                     itParticle->second.mean.push_back(meanParticle);
-                    itParticle->second.stdev.push_back(stDevParticle);
                     itParticle->second.variance.push_back(varianceParticle);
                 } else {
                     auto statsHole = ClusterStatisticsStruct();
@@ -226,7 +211,6 @@ void ClusterStatistics::process() {
                     statsHole.max = std::vector<float>{maxHole};
                     statsHole.diff = std::vector<float>{(maxHole - minHole)};
                     statsHole.mean = std::vector<float>{meanHole};
-                    statsHole.stdev = std::vector<float>{stDevHole};
                     statsHole.variance = std::vector<float>{varianceHole};
                     subgroupToClusterStatistics_hole.emplace(i, statsHole);
 
@@ -235,7 +219,6 @@ void ClusterStatistics::process() {
                     statsParticle.max = std::vector<float>{maxParticle};
                     statsParticle.diff = std::vector<float>{(maxParticle - minParticle)};
                     statsParticle.mean = std::vector<float>{meanParticle};
-                    statsParticle.stdev = std::vector<float>{stDevParticle};
                     statsParticle.variance = std::vector<float>{varianceParticle};
                     subgroupToClusterStatistics_particle.emplace(i, statsParticle);
                 }
@@ -271,14 +254,10 @@ void ClusterStatistics::process() {
                                  subgroupToClusterStatistics_particle[i].diff);
         meanDataFrame->addColumn("Mean hole charge sg " + std::to_string(i + 1),
                                  subgroupToClusterStatistics_hole[i].mean);
-       /* meanDataFrame->addColumn("Stdev hole charge sg " + std::to_string(i + 1),
-                                 subgroupToClusterStatistics_hole[i].stdev);*/
         meanDataFrame->addColumn("Variance hole charge sg " + std::to_string(i + 1),
                                  subgroupToClusterStatistics_hole[i].variance);
         meanDataFrame->addColumn("Mean particle charge sg " + std::to_string(i + 1),
                                  subgroupToClusterStatistics_particle[i].mean);
-       /* meanDataFrame->addColumn("Stdev particle charge sg " + std::to_string(i + 1),
-                                 subgroupToClusterStatistics_particle[i].stdev);*/
         meanDataFrame->addColumn("Variance particle charge sg " + std::to_string(i + 1),
                                  subgroupToClusterStatistics_particle[i].variance);
     }

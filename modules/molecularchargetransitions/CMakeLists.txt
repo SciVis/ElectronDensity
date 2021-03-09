@@ -2,6 +2,7 @@ ivw_module(MolecularChargeTransitions)
 
 set(HEADER_FILES
     include/inviwo/molecularchargetransitions/algorithm/chargetransfermatrix.h
+    include/inviwo/molecularchargetransitions/algorithm/statistics.h
     include/inviwo/molecularchargetransitions/molecularchargetransitionsmodule.h
     include/inviwo/molecularchargetransitions/molecularchargetransitionsmoduledefine.h
     include/inviwo/molecularchargetransitions/processors/clusterstatistics.h
@@ -12,6 +13,7 @@ ivw_group("Header Files" ${HEADER_FILES})
 
 set(SOURCE_FILES
     src/algorithm/chargetransfermatrix.cpp
+    src/algorithm/statistics.cpp
     src/molecularchargetransitionsmodule.cpp
     src/processors/clusterstatistics.cpp
     src/processors/computechargetransfer.cpp
@@ -27,6 +29,7 @@ ivw_group("Shader Files" ${SHADER_FILES})
 set(TEST_FILES
     tests/unittests/charge-transfer-matrix-test.cpp
     tests/unittests/molecularchargetransitions-unittest-main.cpp
+    tests/unittests/statistics-test.cpp
 )
 ivw_add_unittest(${TEST_FILES})
 

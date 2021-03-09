@@ -26,56 +26,20 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  *********************************************************************************/
-
 #pragma once
 
 #include <inviwo/molecularchargetransitions/molecularchargetransitionsmoduledefine.h>
-#include <inviwo/core/processors/processor.h>
-#include <inviwo/core/properties/ordinalproperty.h>
-#include <inviwo/dataframe/datastructures/dataframe.h>
-#include <inviwo/molecularchargetransitions/algorithm/statistics.h>
 
 namespace inviwo {
 
-/** \docpage{org.inviwo.ClusterStatistics, Cluster Statistics}
- * ![](org.inviwo.ClusterStatistics.png?classIdentifier=org.inviwo.ClusterStatistics)
- * Explanation of how to use the processor.
- *
- * ### Inports
- *   * __<Inport1>__ <description>.
- *
- * ### Outports
- *   * __<Outport1>__ <description>.
- *
- * ### Properties
- *   * __<Prop1>__ <description>.
- *   * __<Prop2>__ <description>
+/**
+ * meanValue - calculates mean value of input values in vector
+ * variance - calculates variance of input values in vector (assumes the values are the whole population)
  */
-class IVW_MODULE_MOLECULARCHARGETRANSITIONS_API ClusterStatistics : public Processor {
+class IVW_MODULE_MOLECULARCHARGETRANSITIONS_API Statistics {
 public:
-    ClusterStatistics();
-    virtual ~ClusterStatistics() = default;
-
-    virtual void process() override;
-
-    virtual const ProcessorInfo getProcessorInfo() const override;
-    static const ProcessorInfo processorInfo_;
-
-private:
-    struct ClusterStatisticsStruct {
-        std::vector<float> min;
-        std::vector<float> max;
-        std::vector<float> diff;
-        std::vector<float> mean;
-        std::vector<float> stdev;
-        std::vector<float> variance;
-    };
-
-    DataFrameInport inport_;
-    DataFrameOutport outport_;
-    DataFrameOutport diffOutport_;
-    DataFrameOutport meanOutport_;
-    IntProperty nrSubgroups_;
+    static float meanValue(const std::vector<float>& values);
+    static float variance(const std::vector<float>& values, const float& mean);
 };
 
 }  // namespace inviwo
