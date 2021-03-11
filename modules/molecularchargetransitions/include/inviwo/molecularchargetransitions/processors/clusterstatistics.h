@@ -32,6 +32,7 @@
 #include <inviwo/molecularchargetransitions/molecularchargetransitionsmoduledefine.h>
 #include <inviwo/core/processors/processor.h>
 #include <inviwo/core/properties/ordinalproperty.h>
+#include <inviwo/dataframe/properties/dataframeproperty.h>
 #include <inviwo/dataframe/datastructures/dataframe.h>
 #include <inviwo/molecularchargetransitions/algorithm/statistics.h>
 
@@ -76,6 +77,7 @@ private:
     DataFrameOutport diffOutport_;
     DataFrameOutport meanOutport_;
     IntProperty nrSubgroups_;
+    DataFrameColumnProperty clusterCol_;
 };
 
 }  // namespace inviwo

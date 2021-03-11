@@ -47,13 +47,15 @@ ClusterStatistics::ClusterStatistics()
     , outport_("outport")
     , diffOutport_("diffOutport")
     , meanOutport_("meanOutport")
-    , nrSubgroups_("nrSubgroups", "Nr of subgroups", 2, 1, 10, 1) {
+    , nrSubgroups_("nrSubgroups", "Nr of subgroups", 2, 1, 10, 1)
+    , clusterCol_{"clusterCol", "Cluster Column", inport_, false, 0} {
 
     addPort(inport_);
     addPort(outport_);
     addPort(diffOutport_);
     addPort(meanOutport_);
     addProperty(nrSubgroups_);
+    addProperty(clusterCol_);
 }
 
 void ClusterStatistics::process() {
@@ -62,7 +64,7 @@ void ClusterStatistics::process() {
 
     const auto clusters =
         inport_.getData()
-            ->getColumn("Cluster")
+            ->getColumn(clusterCol_.get())
             ->getBuffer()
             ->getRepresentation<BufferRAM>()
             ->dispatch<std::vector<int>, dispatching::filter::Scalars>([](auto buf) {
