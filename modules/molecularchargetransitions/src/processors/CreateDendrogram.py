@@ -1,9 +1,13 @@
 # Name: CreateDendrogram 
+# Requires scipy>=1.6.0
 
 import inviwopy as ivw
-import numpy as np
+import ivwdataframe as df
+from inviwopy.glm import vec2,vec3,vec4
 
+import numpy as np
 from matplotlib import pyplot as plt
+from matplotlib import colors as col
 from scipy.cluster.hierarchy import dendrogram
 from sklearn.cluster import AgglomerativeClustering
 
@@ -42,6 +46,12 @@ class CreateDendrogram(ivw.Processor):
         self.columnName = ivw.properties.StringProperty("column_name", "Column name", "Cluster")
         self.addProperty(self.columnName)
 
+        self.inputTf = ivw.properties.TransferFunctionProperty("inputTf", "Input transfer function", ivw.data.TransferFunction())
+        self.addProperty(self.inputTf, owner=False)
+
+        self.outputTf = ivw.properties.TransferFunctionProperty("outputTf", "Output transfer function", ivw.data.TransferFunction())
+        self.addProperty(self.outputTf, owner=False)
+
     @staticmethod
     def processorInfo():
         return ivw.ProcessorInfo(
@@ -78,14 +88,14 @@ class CreateDendrogram(ivw.Processor):
                                       counts]).astype(float)
         
         # Plot the corresponding dendrogram
-        dendrogram(linkage_matrix, **kwargs)
+        d = dendrogram(linkage_matrix, **kwargs)
+        return d
 
     def process(self):
         print("process")
 
         inputDataFrame = self.dataFrame.getData()
 
-        
         # Get data from data frame
         X = []
         for i in range(0, inputDataFrame.rows):
@@ -120,22 +130,52 @@ class CreateDendrogram(ivw.Processor):
 
         dataframe = df.DataFrame()
         dataframe.addFloatColumn(self.columnName.value, model.labels_)
+
+        # Sample colors from input transfer function (between 0 and 1)
+        delta = 1.0/model.n_clusters_
+        x = delta/2
+        colors = []
+        for i in range(0,model.n_clusters_):
+            colors.append(col.to_hex(np.array(self.inputTf.value.sample(x))))
+            x = x + delta
+        
+        # Set color palette for dendrogram
+        from scipy.cluster import hierarchy
+        hierarchy.set_link_color_palette(colors)
+
+        plt.clf()
+        plt.title('Hierarchical Clustering Dendrogram')
+
+        # plot the top p levels of the dendrogram
+        #self.plot_dendrogram(model, truncate_mode='level', p=5)
+        # plot the whole dendrogram
+        d = self.plot_dendrogram(model, color_threshold=self.threshold.value, no_labels=True, get_leaves=True)
+        dendrogramColors = d['leaves_color_list']
+        leaves = d['leaves']
+        z = zip(leaves, dendrogramColors)
+        # sort these together to get the leave indices with corresponding color
+        z_sorted = sorted(z, key = lambda t: t[0])
+        z_unzipped = list(zip(*z_sorted))
+
+        dataframe.addCategoricalColumn("colors", z_unzipped[1])
+        dataframe.addIntColumn("leaves", z_unzipped[0])
+
+        # set output transfer function
+        outputTf = self.outputTf.value
+        outputTf.clear()
+        x = delta/2
+        for i in range(0,model.n_clusters_):
+            ind = np.where(model.labels_==i)
+            outputTf.add(x, ivw.glm.vec4(col.to_rgba(z_unzipped[1][ind[0][0]])))
+            x = x + delta
+
+        plt.tight_layout()
+        # plt.xlabel("Number of points in node (or index of point if no parenthesis).")
+        if (self.saveFileCheckbox.value == True):
+            plt.savefig("C:/Users/sigsi52/Development/Inviwo/ElectronDensity/data/results/plots/dendrogram" + self.fileFormat.value, bbox_inches='tight')
+            # plt.savefig("C:/Users/sigsi52/Development/Inviwo/ElectronDensity/data/results/plots/dendrogram_" + self.featureVector.value + "_" + self.linkage.value + self.fileFormat.value, bbox_inches='tight')
+
         dataframe.updateIndex()
 
         self.outport.setData(dataframe)
-
-        if (self.saveFileCheckbox.value == True):
-            plt.clf()
-            plt.title('Hierarchical Clustering Dendrogram')
-
-            # plot the top p levels of the dendrogram
-            #self.plot_dendrogram(model, truncate_mode='level', p=5)
-            # plot the whole dendrogram
-            self.plot_dendrogram(model, color_threshold=self.threshold.value)
-
-            plt.tight_layout()
-            plt.xlabel("Number of points in node (or index of point if no parenthesis).")
-
-
-            plt.savefig("C:/Users/sigsi52/Development/Inviwo/ElectronDensity/data/results/plots/dendrogram_" + self.featureVector.value + "_" + self.linkage.value + self.fileFormat.value, bbox_inches='tight')
         
