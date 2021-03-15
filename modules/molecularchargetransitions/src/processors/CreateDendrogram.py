@@ -163,12 +163,14 @@ class CreateDendrogram(ivw.Processor):
         # set output transfer function
         outputTf = self.outputTf.value
         outputTf.clear()
-        x = delta/2
+
+        x = 0
         for i in range(0,model.n_clusters_):
             ind = np.where(model.labels_==i)
             outputTf.add(x, ivw.glm.vec4(col.to_rgba(z_unzipped[1][ind[0][0]])))
+            outputTf.add(x+delta, ivw.glm.vec4(col.to_rgba(z_unzipped[1][ind[0][0]])))
             x = x + delta
-
+        
         plt.tight_layout()
         # plt.xlabel("Number of points in node (or index of point if no parenthesis).")
         if (self.saveFileCheckbox.value == True):
