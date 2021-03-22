@@ -32,6 +32,14 @@ class CreateDendrogram(ivw.Processor):
                                                    ivw.properties.StringOption("single", "Single", "single")])
         self.addProperty(self.linkage)
 
+        self.distanceMetric = ivw.properties.OptionPropertyString(
+            "distance_metric", "Distance metric", [ivw.properties.StringOption("euclidean", "euclidean", "euclidean"), 
+                                                   ivw.properties.StringOption("l1", "l1", "l1"), 
+                                                   ivw.properties.StringOption("l2", "l2", "l2"),
+                                                   ivw.properties.StringOption("manhattan", "manhattan", "manhattan"),
+                                                   ivw.properties.StringOption("cosine", "cosine", "cosine")])
+        self.addProperty(self.distanceMetric)
+
         self.fileFormat = ivw.properties.OptionPropertyString(
             "fileFormat", "File format", [ivw.properties.StringOption(".png", ".png", ".png"), 
                                           ivw.properties.StringOption(".svg", ".svg", ".svg")])
@@ -124,7 +132,7 @@ class CreateDendrogram(ivw.Processor):
         print("Dimensions of X: " + str(X.shape))
 
         # setting distance_threshold=0 ensures we compute the full tree.
-        model = AgglomerativeClustering(distance_threshold=self.threshold.value, n_clusters=None, linkage=self.linkage.value)
+        model = AgglomerativeClustering(distance_threshold=self.threshold.value, n_clusters=None, linkage=self.linkage.value, affinity=self.distanceMetric.value)
         
         model = model.fit(X)
 
