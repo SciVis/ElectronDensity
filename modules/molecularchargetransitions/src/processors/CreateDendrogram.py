@@ -178,6 +178,9 @@ class CreateDendrogram(ivw.Processor):
             outputTf.add(x, ivw.glm.vec4(col.to_rgba(z_unzipped[1][ind[0][0]])))
             outputTf.add(x+delta, ivw.glm.vec4(col.to_rgba(z_unzipped[1][ind[0][0]])))
             x = x + delta
+
+        # plot line at threshold
+        plt.axhline(y=self.threshold.value, c='grey', lw=1, linestyle='dashed')
         
         plt.tight_layout()
         # plt.xlabel("Number of points in node (or index of point if no parenthesis).")
