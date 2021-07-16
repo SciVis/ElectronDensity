@@ -47,15 +47,20 @@ ClusterStatistics::ClusterStatistics()
     , outport_("outport")
     , diffOutport_("diffOutport")
     , meanOutport_("meanOutport")
+    , meanMeasureOfLocalityOutport_("meanMeasureOfLocalityOutport")
     , nrSubgroups_("nrSubgroups", "Nr of subgroups", 2, 1, 10, 1)
-    , clusterCol_{"clusterCol", "Cluster Column", inport_, false, 0} {
+    , clusterCol_{"clusterCol", "Cluster column", inport_, false, 0}
+    , measureOfLocalityCol_{"measureOfLocalityCol", "Measure of Locality column", inport_, false,
+                            0} {
 
     addPort(inport_);
     addPort(outport_);
     addPort(diffOutport_);
     addPort(meanOutport_);
+    addPort(meanMeasureOfLocalityOutport_);
     addProperty(nrSubgroups_);
     addProperty(clusterCol_);
+    addProperty(measureOfLocalityCol_);
 }
 
 void ClusterStatistics::process() {
@@ -126,6 +131,7 @@ void ClusterStatistics::process() {
                                    [&](auto v) { return static_cast<float>(v); });
                     return dst;
                 }));
+
         particleCharges.push_back(
             particleCol->getBuffer()
                 ->getRepresentation<BufferRAM>()
@@ -138,10 +144,28 @@ void ClusterStatistics::process() {
                 }));
     }
 
+    const auto measureOfLocalityCol = inport_.getData()->getColumn(measureOfLocalityCol_.get());
+
+    if (measureOfLocalityCol == nullptr) {
+        throw Exception("Could not get diff column", IVW_CONTEXT);
+    }
+
+    const auto measureOfLocalityData =
+        measureOfLocalityCol->getBuffer()
+            ->getRepresentation<BufferRAM>()
+            ->dispatch<std::vector<float>, dispatching::filter::Scalars>([](auto buf) {
+                auto& data = buf->getDataContainer();
+                std::vector<float> dst(data.size(), 0.0f);
+                std::transform(data.begin(), data.end(), dst.begin(),
+                               [&](auto v) { return static_cast<float>(v); });
+                return dst;
+            });
+
     std::vector<int> clusterNr = {};
     std::vector<size_t> clusterSize = {};
     std::unordered_map<int, ClusterStatisticsStruct> subgroupToClusterStatistics_hole = {};
     std::unordered_map<int, ClusterStatisticsStruct> subgroupToClusterStatistics_particle = {};
+    std::vector<float> meanOfMeasureOfLocaliesInClusters = {};
 
     for (auto&& c : clusterNrToIndex) {
         clusterNr.push_back(c.first);
@@ -226,12 +250,22 @@ void ClusterStatistics::process() {
                 }
             }
         }
+
+        // Get measure of locality data for each cluster
+        std::vector<float> allMeasureOfLocalityInCluster = {};
+        for (auto&& ind : c.second) {
+            allMeasureOfLocalityInCluster.push_back(measureOfLocalityData[ind]);
+        }
+        meanOfMeasureOfLocaliesInClusters.push_back(
+            Statistics::meanValue(allMeasureOfLocalityInCluster));
     }
 
     auto dataFrame = std::make_shared<DataFrame>(static_cast<glm::u32>(clusterNrToIndex.size()));
     auto diffDataFrame =
         std::make_shared<DataFrame>(static_cast<glm::u32>(clusterNrToIndex.size()));
     auto meanDataFrame =
+        std::make_shared<DataFrame>(static_cast<glm::u32>(clusterNrToIndex.size()));
+    auto measureOfLocalityDataFrame =
         std::make_shared<DataFrame>(static_cast<glm::u32>(clusterNrToIndex.size()));
 
     dataFrame->addColumn("Cluster", clusterNr);
@@ -240,6 +274,10 @@ void ClusterStatistics::process() {
     diffDataFrame->addColumn("Cluster size", clusterSize);
     meanDataFrame->addColumn("Cluster", clusterNr);
     meanDataFrame->addColumn("Cluster size", clusterSize);
+    measureOfLocalityDataFrame->addColumn("Cluster", clusterNr);
+    measureOfLocalityDataFrame->addColumn("Cluster size", clusterSize);
+    measureOfLocalityDataFrame->addColumn("Mean of MeasureOfLocalities",
+                                          meanOfMeasureOfLocaliesInClusters);
 
     for (size_t i = 0; i < nrSubgroups; i++) {
         dataFrame->addColumn("Min hole charge sg " + std::to_string(i + 1),
@@ -267,6 +305,7 @@ void ClusterStatistics::process() {
     outport_.setData(dataFrame);
     diffOutport_.setData(diffDataFrame);
     meanOutport_.setData(meanDataFrame);
+    meanMeasureOfLocalityOutport_.setData(measureOfLocalityDataFrame);
 }
 
 }  // namespace inviwo

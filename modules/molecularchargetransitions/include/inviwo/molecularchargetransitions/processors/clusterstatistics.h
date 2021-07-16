@@ -76,8 +76,10 @@ private:
     DataFrameOutport outport_;
     DataFrameOutport diffOutport_;
     DataFrameOutport meanOutport_;
+    DataFrameOutport meanMeasureOfLocalityOutport_;
     IntProperty nrSubgroups_;
     DataFrameColumnProperty clusterCol_;
+    DataFrameColumnProperty measureOfLocalityCol_;
 };
 
 }  // namespace inviwo
