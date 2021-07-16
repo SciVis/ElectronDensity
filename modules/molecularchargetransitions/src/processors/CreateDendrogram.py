@@ -63,6 +63,12 @@ class CreateDendrogram(ivw.Processor):
         self.outputTf = ivw.properties.TransferFunctionProperty("outputTf", "Output transfer function", ivw.data.TransferFunction())
         self.addProperty(self.outputTf, owner=False)
 
+        self.highlightCluster = ivw.properties.BoolProperty("highlight_cluster", "Highlight cluster", False)
+        self.addProperty(self.highlightCluster)
+
+        self.clusterToHighlight = ivw.properties.IntProperty("cluster_to_highlight", "Cluster to highlight", 1, 0, 10, 1)
+        self.addProperty(self.clusterToHighlight)
+
     @staticmethod
     def processorInfo():
         return ivw.ProcessorInfo(
@@ -175,12 +181,23 @@ class CreateDendrogram(ivw.Processor):
         outputTf = self.outputTf.value
         outputTf.clear()
 
-        x = 0
-        for i in range(0,model.n_clusters_):
-            ind = np.where(model.labels_==i)
-            outputTf.add(x, ivw.glm.vec4(col.to_rgba(z_unzipped[1][ind[0][0]])))
-            outputTf.add(x+delta, ivw.glm.vec4(col.to_rgba(z_unzipped[1][ind[0][0]])))
-            x = x + delta
+        if (self.highlightCluster.value == True):
+            x = 0
+            for i in range(0,model.n_clusters_):
+                if (i == self.clusterToHighlight.value):
+                    outputTf.add(x, ivw.glm.vec4(col.to_rgba('#3f3f3f')))
+                    outputTf.add(x+delta, ivw.glm.vec4(col.to_rgba('#3f3f3f')))
+                else:
+                    outputTf.add(x, ivw.glm.vec4(col.to_rgba('#bebebe')))
+                    outputTf.add(x+delta, ivw.glm.vec4(col.to_rgba('#bebebe')))
+                x = x + delta
+        else:
+            x = 0
+            for i in range(0,model.n_clusters_):
+                ind = np.where(model.labels_==i)
+                outputTf.add(x, ivw.glm.vec4(col.to_rgba(z_unzipped[1][ind[0][0]])))
+                outputTf.add(x+delta, ivw.glm.vec4(col.to_rgba(z_unzipped[1][ind[0][0]])))
+                x = x + delta
 
         # plot line at threshold
         plt.axhline(y=self.threshold.value, c='grey', lw=1, linestyle='dashed')
