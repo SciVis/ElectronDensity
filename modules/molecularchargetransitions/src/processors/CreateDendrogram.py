@@ -54,6 +54,9 @@ class CreateDendrogram(ivw.Processor):
         self.columnName = ivw.properties.StringProperty("column_name", "Column name", "Cluster")
         self.addProperty(self.columnName)
 
+        self.fileName = ivw.properties.StringProperty("file_name", "File name", "dendrogram")
+        self.addProperty(self.fileName)
+
         self.inputTf = ivw.properties.TransferFunctionProperty("inputTf", "Input transfer function", ivw.data.TransferFunction())
         self.addProperty(self.inputTf, owner=False)
 
@@ -185,7 +188,7 @@ class CreateDendrogram(ivw.Processor):
         plt.tight_layout()
         # plt.xlabel("Number of points in node (or index of point if no parenthesis).")
         if (self.saveFileCheckbox.value == True):
-            plt.savefig("C:/Users/sigsi52/Development/Inviwo/ElectronDensity/data/results/plots/dendrogram" + self.fileFormat.value, bbox_inches='tight')
+            plt.savefig("C:/Users/sigsi52/Development/Inviwo/ElectronDensity/data/results/plots/" + self.fileName.value + self.fileFormat.value, bbox_inches='tight')
             # plt.savefig("C:/Users/sigsi52/Development/Inviwo/ElectronDensity/data/results/plots/dendrogram_" + self.featureVector.value + "_" + self.linkage.value + self.fileFormat.value, bbox_inches='tight')
 
         dataframe.updateIndex()
