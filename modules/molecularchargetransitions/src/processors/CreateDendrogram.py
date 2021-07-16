@@ -146,7 +146,7 @@ class CreateDendrogram(ivw.Processor):
         model = model.fit(X)
 
         dataframe = df.DataFrame()
-        dataframe.addFloatColumn(self.columnName.value, model.labels_)
+        dataframe.addFloatColumn(self.columnName.value, model.labels_ + np.ones(len(model.labels_)))
 
         # Sample colors from input transfer function (between 0 and 1)
         delta = 1.0/model.n_clusters_
