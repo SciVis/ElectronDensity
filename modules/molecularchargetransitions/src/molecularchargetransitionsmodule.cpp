@@ -30,6 +30,7 @@
 #include <inviwo/molecularchargetransitions/molecularchargetransitionsmodule.h>
 #include <inviwo/molecularchargetransitions/processors/clusterstatistics.h>
 #include <inviwo/molecularchargetransitions/processors/computechargetransfer.h>
+#include <inviwo/molecularchargetransitions/processors/measureoflocality.h>
 #include <inviwo/molecularchargetransitions/processors/sumchargeinsegmentedregions.h>
 
 namespace inviwo {
@@ -45,6 +46,7 @@ MolecularChargeTransitionsModule::MolecularChargeTransitionsModule(InviwoApplica
     // Processors
     registerProcessor<ClusterStatistics>();
     registerProcessor<ComputeChargeTransfer>();
+    registerProcessor<MeasureOfLocality>();
     // registerProcessor<MolecularChargeTransitionsProcessor>();
     registerProcessor<SumChargeInSegmentedRegions>();
 
