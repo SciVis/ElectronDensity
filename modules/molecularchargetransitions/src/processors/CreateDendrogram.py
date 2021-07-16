@@ -161,15 +161,16 @@ class CreateDendrogram(ivw.Processor):
         hierarchy.set_link_color_palette(colors)
 
         plt.clf()
-        plt.title('Hierarchical Clustering Dendrogram')
 
         # plot the top p levels of the dendrogram
         #self.plot_dendrogram(model, truncate_mode='level', p=5)
         # plot the whole dendrogram
-        d = self.plot_dendrogram(model, color_threshold=self.threshold.value, no_labels=True, get_leaves=True)
+        d = self.plot_dendrogram(model, color_threshold=self.threshold.value, no_labels=True, get_leaves=True, above_threshold_color='grey')
+        
         dendrogramColors = d['leaves_color_list']
         leaves = d['leaves']
         z = zip(leaves, dendrogramColors)
+        
         # sort these together to get the leave indices with corresponding color
         z_sorted = sorted(z, key = lambda t: t[0])
         z_unzipped = list(zip(*z_sorted))
