@@ -9,7 +9,8 @@ class ParameterSource(ivw.Processor):
         self.outport = df.DataFrameOutport("outport")
         self.addOutport(self.outport)
 
-        self.file = ivw.properties.FileProperty("file", "File")
+        self.file = ivw.properties.FileProperty("file", "File", "parameter")
+        self.file.addNameFilter(ivw.properties.FileExtension("dat", "Parameters"))
         self.addProperty(self.file, owner=False)
 
     @staticmethod
@@ -60,5 +61,6 @@ class ParameterSource(ivw.Processor):
         dataframe.addFloatColumn("Wavelength (nm)", vawelengthNm)
         dataframe.addFloatColumn("Oscillatory strength", oscillatoryStrength)
         dataframe.addFloatColumn("Rotatory strength", rotatoryStrength)
+        dataframe.updateIndex()
 
         self.outport.setData(dataframe)

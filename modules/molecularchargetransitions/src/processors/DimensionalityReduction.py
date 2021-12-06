@@ -52,6 +52,13 @@ class DimensionalityReduction(ivw.Processor):
                                                  ivw.properties.StringOption("chargeTransferMatrix", "Charge transfer matrix", "chargeTransferMatrix")])
         self.addProperty(self.featureVector)
 
+        self.dim1name = ivw.properties.StringProperty("dim1_name", "Dim 1 name", "1")
+        self.addProperty(self.dim1name)
+
+        self.dim2name = ivw.properties.StringProperty("dim2_name", "Dim 2 name", "2")
+        self.addProperty(self.dim2name)
+
+
     @staticmethod
     def processorInfo():
         return ivw.ProcessorInfo(
@@ -139,8 +146,8 @@ class DimensionalityReduction(ivw.Processor):
         #X_transposed = clf.fit_transform(X_transposed)
 
         dataframe = df.DataFrame()
-        dataframe.addFloatColumn("1", X_transposed[0])
-        dataframe.addFloatColumn("2", X_transposed[1])
+        dataframe.addFloatColumn(self.dim1name.value, X_transposed[0])
+        dataframe.addFloatColumn(self.dim2name.value, X_transposed[1])
         dataframe.updateIndex()
 
         self.outport.setData(dataframe)

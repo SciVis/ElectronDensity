@@ -11,6 +11,13 @@ from matplotlib import colors as col
 from scipy.cluster.hierarchy import dendrogram
 from sklearn.cluster import AgglomerativeClustering
 
+# To solve the error
+# "AttributeError: module 'sys' has no attribute 'argv' At: C:\Users\sigsi52\AppData\Local\Programs\Python\Python37\Lib\tkinter\__init__.py..."
+import sys
+
+if not hasattr(sys, 'argv'):
+    sys.argv  = ['']
+
 class CreateDendrogram(ivw.Processor):
     def __init__(self, id, name):
         ivw.Processor.__init__(self, id, name)
@@ -110,8 +117,10 @@ class CreateDendrogram(ivw.Processor):
 
     def process(self):
         print("process")
-
         inputDataFrame = self.dataFrame.getData()
+        
+        # This seem to help if get error: 'NoneType' object has no attribute 'rows' ??
+        print(inputDataFrame.rows)
 
         # Get data from data frame
         X = []
@@ -202,7 +211,9 @@ class CreateDendrogram(ivw.Processor):
 
         # plot line at threshold
         plt.axhline(y=self.threshold.value, c='grey', lw=1, linestyle='dashed')
-        
+        ax = plt.gca()
+        ax.axes.yaxis.set_visible(False)
+
         plt.tight_layout()
         # plt.xlabel("Number of points in node (or index of point if no parenthesis).")
         if (self.saveFileCheckbox.value == True):

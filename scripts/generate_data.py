@@ -9,7 +9,7 @@ t0 = time.time()
 
 app = inviwopy.app
 network = app.network
-data_folder = "C:/Users/sigsi52/Development/Inviwo/ElectronDensity/data/serie/"
+data_folder = "C:/Users/sigsi52/Development/Inviwo/ElectronDensity/data/cpp-new/"
 
 # Read metadata file
 f = open(data_folder + "metadata.csv", mode='r')
@@ -41,7 +41,7 @@ for file in fileNames:
     cubeLoader1.cube.value = data_folder + file[1]
     
     # Particle
-    cubeLoader2 = network.CubeSource2
+    cubeLoader2 = network.CubeSource3 # CubeSource2
     cubeLoader2.cube.value = data_folder + file[2]
 
     # unlock
@@ -96,7 +96,7 @@ chargeTransferNames = []
 for m in range(1, nrSubgroups+1): 
     holeNames.append("Hole sg" + str(m))
     particleNames.append("Particle sg" + str(m))
-    diffNames.append("Diff sg" + str(m))
+    diffNames.append("Delta q sg" + str(m))
     for ind1, ind2 in zip([m]*nrSubgroups, range(1,nrSubgroups+1)):
         chargeTransferNames.append("Charge transfer " + str(ind1) + str(ind2))
 
@@ -108,7 +108,7 @@ header.extend(particleNames)
 header.extend(diffNames)
 header.extend(chargeTransferNames)
 
-with open(data_folder + 'results2.csv', 'w', newline='') as resultsFile:
+with open(data_folder + 'results3.csv', 'w', newline='') as resultsFile:
     writer = csv.writer(resultsFile)
     writer.writerow(header)
     writer.writerows(dataResult)

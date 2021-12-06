@@ -3,13 +3,14 @@
 import csv
 
 
-data_folder = "C:/Users/sigsi52/Development/Inviwo/ElectronDensity/data/cu-h-me/"
+data_folder = "C:/Users/sigsi52/Development/Inviwo/ElectronDensity/data/cpp-new/"
 #filenames = ['tq-0', 'tq-15', 'tq-30', 'tq-45', 'tq-60', 'tq-75', 'tq-90', 'tq-105', 'tq-120', 'tq-135', 'tq-150', 'tq-165', 'tq-180']
 #filenames = ['A2B2-td', 'A3B-td', 'A4-td', 'ABAB-td']
 #filenames = ['ag-phe-ipr-td', 'ag-phe-pheme-td', 'ag-phe-pheome-td', 'ag-phe-phephe-td', 'ag-phe-xant-td', 'ag-phe2-td',
 #             'au-phe-ipr-td', 'au-phe-pheme-td', 'au-phe-pheome-td', 'au-phe-phephe-td', 'au-phe-xant-td', 'au-phe2-td',
 #             'cu-phe-ipr-td', 'cu-phe-pheme-td', 'cu-phe-pheome-td', 'cu-phe-phephe-td', 'cu-phe-xant-td', 'cu-phe2-td']
-filenames = ['cu-h-me3-p', 'cu-h-me3', 'cu-h2-me2-p', 'cu-h2-me2', 'cu-h3-me-p', 'cu-h3-me', 'cu-h4', 'cu-me4-p', 'cu-me4']
+#filenames = ['cu-h-me3-p', 'cu-h-me3', 'cu-h2-me2-p', 'cu-h2-me2', 'cu-h3-me-p', 'cu-h3-me', 'cu-h4', 'cu-me4-p', 'cu-me4']
+filenames = ['A2B2', 'A3B', 'AAAA', 'AB3', 'ABAB', 'BBBB']
 
 output = []
 for k in range(0, len(filenames)):
