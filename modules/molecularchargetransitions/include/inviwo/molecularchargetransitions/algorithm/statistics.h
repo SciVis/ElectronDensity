@@ -29,6 +29,7 @@
 #pragma once
 
 #include <inviwo/molecularchargetransitions/molecularchargetransitionsmoduledefine.h>
+#include <vector>
 
 namespace inviwo {
 

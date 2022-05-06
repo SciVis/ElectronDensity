@@ -28,6 +28,7 @@
  *********************************************************************************/
 
 #include <inviwo/molecularchargetransitions/algorithm/statistics.h>
+#include <numeric>
 
 namespace inviwo {
 

@@ -32,7 +32,7 @@
 #include <inviwo/molecularchargetransitions/molecularchargetransitionsmoduledefine.h>
 #include <inviwo/core/processors/processor.h>
 #include <inviwo/core/properties/ordinalproperty.h>
-#include <inviwo/dataframe/properties/dataframeproperty.h>
+#include <inviwo/dataframe/properties/columnoptionproperty.h>
 #include <inviwo/dataframe/datastructures/dataframe.h>
 #include <inviwo/molecularchargetransitions/algorithm/statistics.h>
 
@@ -78,8 +78,8 @@ private:
     DataFrameOutport meanOutport_;
     DataFrameOutport meanMeasureOfLocalityOutport_;
     IntProperty nrSubgroups_;
-    DataFrameColumnProperty clusterCol_;
-    DataFrameColumnProperty measureOfLocalityCol_;
+    ColumnOptionProperty clusterCol_;
+    ColumnOptionProperty measureOfLocalityCol_;
 };
 
 }  // namespace inviwo

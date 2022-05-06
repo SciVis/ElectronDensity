@@ -31,6 +31,8 @@
 #include <inviwo/molecularchargetransitions/molecularchargetransitionsmoduledefine.h>
 #include <vector>
 
+#include <inviwo/core/common/inviwoapplication.h>
+
 namespace inviwo {
 
 /**

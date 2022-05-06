@@ -49,9 +49,9 @@ ClusterStatistics::ClusterStatistics()
     , meanOutport_("meanOutport")
     , meanMeasureOfLocalityOutport_("meanMeasureOfLocalityOutport")
     , nrSubgroups_("nrSubgroups", "Nr of subgroups", 2, 1, 10, 1)
-    , clusterCol_{"clusterCol", "Cluster column", inport_, false, 0}
-    , measureOfLocalityCol_{"measureOfLocalityCol", "Measure of Locality column", inport_, false,
-                            0} {
+    , clusterCol_{"clusterCol", "Column", inport_, ColumnOptionProperty::AddNoneOption::No, 0}
+    , measureOfLocalityCol_{"measureOfLocalityCol", "Measure of Locality column", inport_,
+                            ColumnOptionProperty::AddNoneOption::No, 0} {
 
     addPort(inport_);
     addPort(outport_);
@@ -94,7 +94,7 @@ void ClusterStatistics::process() {
         if (clusterNrToIndex.empty()) {
             clusterNrToIndex.emplace(clusterNr, std::vector<uint32_t>{index});
         } else {
-            auto& it = clusterNrToIndex.find(clusterNr);
+            auto it = clusterNrToIndex.find(clusterNr);
 
             if (it != clusterNrToIndex.end()) {
                 it->second.push_back(index);
@@ -215,8 +215,8 @@ void ClusterStatistics::process() {
                 statsParticle.variance = std::vector<float>{varianceParticle};
                 subgroupToClusterStatistics_particle.emplace(i, statsParticle);
             } else {
-                auto& itHole = subgroupToClusterStatistics_hole.find(i);
-                auto& itParticle = subgroupToClusterStatistics_particle.find(i);
+                auto itHole = subgroupToClusterStatistics_hole.find(i);
+                auto itParticle = subgroupToClusterStatistics_particle.find(i);
 
                 if (itHole != subgroupToClusterStatistics_hole.cend() &&
                     itParticle != subgroupToClusterStatistics_particle.cend()) {
