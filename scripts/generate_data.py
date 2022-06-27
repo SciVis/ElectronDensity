@@ -9,7 +9,7 @@ t0 = time.time()
 
 app = inviwopy.app
 network = app.network
-data_folder = "C:/Users/sigsi52/Development/Inviwo/ElectronDensity/data/cpp-new/"
+data_folder = "C:/Users/sigsi52/Development/Inviwo/ElectronDensity/data/silver-complexes/"
 
 # Read metadata file
 f = open(data_folder + "metadata.csv", mode='r')
@@ -41,7 +41,7 @@ for file in fileNames:
     cubeLoader1.cube.value = data_folder + file[1]
     
     # Particle
-    cubeLoader2 = network.CubeSource3 # CubeSource2
+    cubeLoader2 = network.CubeSource2 # CubeSource3
     cubeLoader2.cube.value = data_folder + file[2]
 
     # unlock
