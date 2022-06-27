@@ -113,7 +113,7 @@ class CreateClusterTransitionDiagrams(ivw.Processor):
                                     fv.append(value)
                                     text_file.write(f"{value} ")
                             text_file.write("\n")
-                        feature_vectors.append(fv)
+                            feature_vectors.append(fv)
                     text_file.close()
 
                 with open(f"{self.fileLocation.value}/{labels_file_name}{int(c)}.txt", "w") as text_file:
@@ -135,7 +135,7 @@ class CreateClusterTransitionDiagrams(ivw.Processor):
             os.chdir(self.electronicTransitionsLODLocation.value)
             for c in range(int(cluster_range[0]), int(cluster_range[1] + 1)):
                 s = self.javaLocation.value + ' ClusterDiagram ' + self.fileLocation.value + '/' + cluster_file_name + str(int(c)) + '.txt '\
-                    + self.fileLocation.value + '/' + labels_file_name + str(int(c)) + ".txt " + self.fileLocation.value + ' ' + ' ' + job_id + ' ' + str(int(c))
+                    + self.fileLocation.value + '/' + labels_file_name + str(int(c)) + ".txt " + self.fileLocation.value + ' ' + job_id + ' ' + str(int(c))
                 res = subprocess.run(s, shell=True, capture_output=True)
                 print(f"returncode: {res.returncode}, stderr: {res.stderr}, stdout: {res.stdout}, executed: {s}")
 
