@@ -55,6 +55,7 @@ class ParameterSource(ivw.Processor):
             oscillatoryStrength.append(float(splitted[3].strip()))
             rotatoryStrength.append(float(splitted[4].strip()))
 
+        # OBS: assuming the parameters come in this specific order!
         dataframe = df.DataFrame()
         dataframe.addCategoricalColumn("Name", name)
         dataframe.addFloatColumn("Energy (eV)", energyEv)

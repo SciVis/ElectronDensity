@@ -11,13 +11,6 @@ from matplotlib import colors as col
 from scipy.cluster.hierarchy import dendrogram
 from sklearn.cluster import AgglomerativeClustering
 
-# To solve the error
-# "AttributeError: module 'sys' has no attribute 'argv' At: C:\Users\sigsi52\AppData\Local\Programs\Python\Python37\Lib\tkinter\__init__.py..."
-import sys
-
-if not hasattr(sys, 'argv'):
-    sys.argv  = ['']
-
 class CreateDendrogram(ivw.Processor):
     def __init__(self, id, name):
         ivw.Processor.__init__(self, id, name)
@@ -26,11 +19,8 @@ class CreateDendrogram(ivw.Processor):
         self.outport = df.DataFrameOutport("outport")
         self.addOutport(self.outport)
 
-        self.featureVector = ivw.properties.OptionPropertyString(
-            "feature_vector", "Feature vector", [ivw.properties.StringOption("reducedDims", "Reduced dimensions", "reducedDims"), 
-                                                 ivw.properties.StringOption("holeAndParticle", "Hole and particle", "holeAndParticle"), 
-                                                 ivw.properties.StringOption("chargeTransferMatrix", "Charge transfer matrix", "chargeTransferMatrix")])
-        self.addProperty(self.featureVector)
+        self.featureVectorName = ivw.properties.StringProperty("fetureVectorName", "Feature vector name", "TranFV")
+        self.addProperty(self.featureVectorName)
 
         self.linkage = ivw.properties.OptionPropertyString(
             "linkage", "Linkage (Agglomerative)", [ivw.properties.StringOption("ward", "Ward", "ward"), 
@@ -61,6 +51,9 @@ class CreateDendrogram(ivw.Processor):
         self.columnName = ivw.properties.StringProperty("column_name", "Column name", "Cluster")
         self.addProperty(self.columnName)
 
+        self.fileLocation = ivw.properties.DirectoryProperty("file_path", "File location", "/")
+        self.addProperty(self.fileLocation)
+
         self.fileName = ivw.properties.StringProperty("file_name", "File name", "dendrogram")
         self.addProperty(self.fileName)
 
@@ -76,11 +69,15 @@ class CreateDendrogram(ivw.Processor):
         self.clusterToHighlight = ivw.properties.IntProperty("cluster_to_highlight", "Cluster to highlight", 1, 0, 10, 1)
         self.addProperty(self.clusterToHighlight)
 
+        self.reloadButton = ivw.properties.ButtonProperty("reload_button", "Reset")
+        self.addProperty(self.reloadButton)
+
+
     @staticmethod
     def processorInfo():
         return ivw.ProcessorInfo(
     		classIdentifier = "org.inviwo.CreateDendrogram", 
-    		displayName = "CreateDendrogram",
+    		displayName = "Create Dendrogram",
     		category = "Python",
     		codeState = ivw.CodeState.Stable,
     		tags = ivw.Tags.PY
@@ -122,32 +119,28 @@ class CreateDendrogram(ivw.Processor):
         # This seem to help if get error: 'NoneType' object has no attribute 'rows' ??
         print(inputDataFrame.rows)
 
-        # Get data from data frame
+        # Get feature vector from data frame
+        featureVector_name = self.featureVectorName.value.lower()
         X = []
+        labels = []
         for i in range(0, inputDataFrame.rows):
-            row = []
+            fv_row = []
+            label = ""
             for j in range(0, inputDataFrame.cols):
                 header = inputDataFrame.column(j).header.lower()
                 
-                # Use reduced dimensions
-                if self.featureVector.value == "reducedDims":
-                    if (header=="1" or header=="2"):
-                        row.append(inputDataFrame.column(j).get(i))
+                # Labels
+                #if (header=="name" or header=="state"):
+                #    label = label + inputDataFrame.column(j).get(i)
 
-                # Use hole and particle subgroup charges
-                elif self.featureVector.value == "holeAndParticle":
-                    if ("hole" in header) or ("particle" in header):
-                        row.append(inputDataFrame.column(j).get(i))
+                if featureVector_name in header:
+                    fv_row.append(inputDataFrame.column(j).get(i))
 
-                # Use charge transfer matrix
-                elif self.featureVector.value == "chargeTransferMatrix":
-                    if ("transfer" in header):
-                        row.append(inputDataFrame.column(j).get(i))
-
-            X.append(row)
+            X.append(fv_row)
+            labels.append(label)
 
         X = np.array(X)
-        print("Dimensions of X: " + str(X.shape))
+        print("CreateDendrogram, dimensions of X: " + str(X.shape))
 
         # setting distance_threshold=0 ensures we compute the full tree.
         model = AgglomerativeClustering(distance_threshold=self.threshold.value, n_clusters=None, linkage=self.linkage.value, affinity=self.distanceMetric.value)
@@ -174,8 +167,9 @@ class CreateDendrogram(ivw.Processor):
         # plot the top p levels of the dendrogram
         #self.plot_dendrogram(model, truncate_mode='level', p=5)
         # plot the whole dendrogram
+        #d = self.plot_dendrogram(model, color_threshold=self.threshold.value, no_labels=False, get_leaves=True, above_threshold_color='grey', leaf_rotation=90., leaf_font_size=3.)
         d = self.plot_dendrogram(model, color_threshold=self.threshold.value, no_labels=True, get_leaves=True, above_threshold_color='grey')
-        
+
         dendrogramColors = d['leaves_color_list']
         leaves = d['leaves']
         z = zip(leaves, dendrogramColors)
@@ -217,8 +211,12 @@ class CreateDendrogram(ivw.Processor):
         plt.tight_layout()
         # plt.xlabel("Number of points in node (or index of point if no parenthesis).")
         if (self.saveFileCheckbox.value == True):
-            plt.savefig("C:/Users/sigsi52/Development/Inviwo/ElectronDensity/data/results/plots/" + self.fileName.value + self.fileFormat.value, bbox_inches='tight')
-            # plt.savefig("C:/Users/sigsi52/Development/Inviwo/ElectronDensity/data/results/plots/dendrogram_" + self.featureVector.value + "_" + self.linkage.value + self.fileFormat.value, bbox_inches='tight')
+            if (self.fileLocation.value == "/"):
+                print('CreateDendrogram: specify a valid file location!')
+            else:
+                print('Saving dendrogram figure')
+                plt.savefig(self.fileLocation.value + '/' + self.fileName.value + self.fileFormat.value, bbox_inches='tight')
+                #self.reloadButton.press()
 
         dataframe.updateIndex()
 

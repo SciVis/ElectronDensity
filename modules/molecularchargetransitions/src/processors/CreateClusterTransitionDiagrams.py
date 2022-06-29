@@ -6,7 +6,7 @@
 
 # It is possible to change draw settings in the draw.properties file (in ElectronicTransitionsLOD)
 
-# Currently, it assumes the 'hole' and 'particle' charges are used as feature vectors
+# Assumes the input data frame contains cluster id and feature vector for each member
 
 import inviwopy as ivw
 import ivwdataframe as df
@@ -27,6 +27,9 @@ class CreateClusterTransitionDiagrams(ivw.Processor):
 
         self.fileLocation = ivw.properties.DirectoryProperty("file_path", "File location (save files)", "/")
         self.addProperty(self.fileLocation)
+
+        self.featureVectorName = ivw.properties.StringProperty("fetureVectorName", "Feature vector name", "TranFV")
+        self.addProperty(self.featureVectorName)
 
         self.clusterColumnName = ivw.properties.StringProperty("cluster_column_name", "Cluster column name", "Cluster")
         self.addProperty(self.clusterColumnName)
@@ -59,7 +62,7 @@ class CreateClusterTransitionDiagrams(ivw.Processor):
     def processorInfo():
         return ivw.ProcessorInfo(
     		classIdentifier = "org.inviwo.CreateClusterTransitionDiagrams", 
-    		displayName = "CreateClusterTransitionDiagrams",
+    		displayName = "Create Cluster Transition Diagrams",
     		category = "Python",
     		codeState = ivw.CodeState.Stable,
     		tags = ivw.Tags.PY
@@ -83,6 +86,7 @@ class CreateClusterTransitionDiagrams(ivw.Processor):
             labels_file_name = 'cluster_diagram_labels'
             job_id = 'job_id'
             cluster_name = self.clusterColumnName.value.lower()
+            featureVector_name = self.featureVectorName.value.lower()
 
             # Get the range for the cluster indices
             cluster_range = []
@@ -105,15 +109,16 @@ class CreateClusterTransitionDiagrams(ivw.Processor):
                     feature_vectors = []
                     for i in range(0, inputDataFrame.rows):
                         if (inputDataFrame.column(cluster_col_nr).get(i) == c):
-                            fv = []
+                            fv_row = []
                             for j in range(0, inputDataFrame.cols):
                                 header = inputDataFrame.column(j).header.lower()
-                                if ("hole" in header) or ("particle" in header):
+                                if featureVector_name in header:
+                                #if ("hole" in header) or ("particle" in header):
                                     value = inputDataFrame.column(j).get(i)
-                                    fv.append(value)
+                                    fv_row.append(value)
                                     text_file.write(f"{value} ")
                             text_file.write("\n")
-                            feature_vectors.append(fv)
+                            feature_vectors.append(fv_row)
                     text_file.close()
 
                 with open(f"{self.fileLocation.value}/{labels_file_name}{int(c)}.txt", "w") as text_file:

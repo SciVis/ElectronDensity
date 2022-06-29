@@ -6,7 +6,7 @@
 
 # It is possible to change draw settings in the dendrogram_draw.properties file (in ElectronicTransitionsLOD)
 
-# Currently, it assumes the 'hole' and 'particle' charges are used as feature vectors
+# Assumes the input data frame contains feature vector for each member
 
 import inviwopy as ivw
 import ivwdataframe as df
@@ -20,6 +20,9 @@ class CreateAugmentedDendrogram(ivw.Processor):
         ivw.Processor.__init__(self, id, name)
         self.dataFrame = df.DataFrameInport("dataFrame")
         self.addInport(self.dataFrame, owner=False)
+
+        self.featureVectorName = ivw.properties.StringProperty("fetureVectorName", "Feature vector name", "TranFV")
+        self.addProperty(self.featureVectorName)
 
         self.linkage = ivw.properties.OptionPropertyString(
             "linkage", "Linkage (Agglomerative)", [ivw.properties.StringOption("ward", "Ward", "ward"), 
@@ -54,7 +57,7 @@ class CreateAugmentedDendrogram(ivw.Processor):
     def processorInfo():
         return ivw.ProcessorInfo(
     		classIdentifier = "org.inviwo.CreateAugmentedDendrogram", 
-    		displayName = "CreateAugmentedDendrogram",
+    		displayName = "Create Augmented Dendrogram",
     		category = "Python",
     		codeState = ivw.CodeState.Stable,
     		tags = ivw.Tags.PY
@@ -81,19 +84,21 @@ class CreateAugmentedDendrogram(ivw.Processor):
             with open(f"{self.fileLocation.value}/{dendrogram_files_name}.txt", "w") as text_file:
                 # Number of members
                 text_file.write(str(inputDataFrame.rows)+'\n')
-                # All feature vectors
+                # Get feature vectors from data frame
+                featureVector_name = self.featureVectorName.value.lower()
                 feature_vectors = []
                 for i in range(0, inputDataFrame.rows):
-                    fv = []
+                    fv_row = []
                     for j in range(0, inputDataFrame.cols):
                         header = inputDataFrame.column(j).header.lower()
-                        if ("hole" in header) or ("particle" in header):
+                        #if ("hole" in header) or ("particle" in header):
+                        if featureVector_name in header:
                             value = inputDataFrame.column(j).get(i)
-                            fv.append(value)
+                            fv_row.append(value)
                             text_file.write(f"{value} ")
                     text_file.write("\n")
                 
-                    feature_vectors.append(fv)
+                    feature_vectors.append(fv_row)
 
                 X = np.array(feature_vectors)
                 clustering = AgglomerativeClustering(n_clusters=None, linkage=self.linkage.value, distance_threshold=-20.0).fit(X)

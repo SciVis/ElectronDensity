@@ -6,8 +6,7 @@
 
 # It is possible to change draw settings in the draw.properties file (in ElectronicTransitionsLOD)
 
-# Currently, it assumes the 'hole' and 'particle' charges are used as feature vectors
-
+# Assumes the input data frame contains name, state and feature vector for each member
 
 import inviwopy as ivw
 import ivwdataframe as df
@@ -34,6 +33,9 @@ class CreateMemberTransitionDiagram(ivw.Processor):
 
         self.fileLocation = ivw.properties.DirectoryProperty("file_path", "File location (save files)", "/")
         self.addProperty(self.fileLocation)
+
+        self.featureVectorName = ivw.properties.StringProperty("fetureVectorName", "Feature vector name", "TranFV")
+        self.addProperty(self.featureVectorName)
 
         self.nameColumnName = ivw.properties.StringProperty("name_column_name", "Name column name", "Name")
         self.addProperty(self.nameColumnName)
@@ -69,7 +71,7 @@ class CreateMemberTransitionDiagram(ivw.Processor):
     def processorInfo():
         return ivw.ProcessorInfo(
     		classIdentifier = "org.inviwo.CreateMemberTransitionDiagram", 
-    		displayName = "CreateMemberTransitionDiagram",
+    		displayName = "Create Member Transition Diagram",
     		category = "Python",
     		codeState = ivw.CodeState.Stable,
     		tags = ivw.Tags.PY
@@ -111,20 +113,22 @@ class CreateMemberTransitionDiagram(ivw.Processor):
                 return
 
             # Save file with feature vector
-            fv = []
+            featureVector_name = self.featureVectorName.value.lower()
+            fv_row = []
             with open(f"{self.fileLocation.value}/{features_file_name}.txt", "w") as text_file:
                 for i in range(0, inputDataFrame.rows):
                     if (self.name.value in str(inputDataFrame.column(name_col_index).get(i)) and self.state.value in str(inputDataFrame.column(state_col_index).get(i))):
                         for j in range(0, inputDataFrame.cols):
                             header = inputDataFrame.column(j).header.lower()
-                            if ("hole" in header) or ("particle" in header):
+                            if featureVector_name in header:
+                            #if ("hole" in header) or ("particle" in header):
                                 value = inputDataFrame.column(j).get(i)
-                                fv.append(value)
+                                fv_row.append(value)
                                 text_file.write(f"{value} ")
                         text_file.write("\n")
                 text_file.close()
             
-            if (len(fv) == 0):
+            if (len(fv_row) == 0):
                 print(f"CreateMemberTransitionDiagram: Could not find the feature vector for the given name and state: {self.name.value}, {self.state.value}")
                 return
 

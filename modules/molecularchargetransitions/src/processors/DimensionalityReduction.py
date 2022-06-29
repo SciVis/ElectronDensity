@@ -17,6 +17,9 @@ class DimensionalityReduction(ivw.Processor):
         self.outport = df.DataFrameOutport("outport")
         self.addOutport(self.outport)
 
+        self.featureVectorName = ivw.properties.StringProperty("fetureVectorName", "Feature vector name", "TranFV")
+        self.addProperty(self.featureVectorName)
+
         self.dimReduction = ivw.properties.OptionPropertyString(
             "dim_reduction", "Dim. red. technique", [ivw.properties.StringOption("tSNE", "t-SNE", "tSNE"), 
                                                      ivw.properties.StringOption("MDS", "MDS", "MDS"),
@@ -36,22 +39,7 @@ class DimensionalityReduction(ivw.Processor):
         self.neighbors = ivw.properties.IntProperty(
             "neighbors", "Neighbors (Isomap)", 5, 3, 40, 1)
         self.addProperty(self.neighbors)
-        self.useOscStrength = ivw.properties.BoolProperty(
-            "use_osc_strength", "Use oscillator strength", False)
-        self.addProperty(self.useOscStrength)
-        self.useRotStrength = ivw.properties.BoolProperty(
-            "use_rot_strenght", "Use rotatory strength", False)
-        self.addProperty(self.useRotStrength)
-        self.useEnergy = ivw.properties.BoolProperty(
-        "use_energy", "Use energy", False)
-        self.addProperty(self.useEnergy)
-
-        self.featureVector = ivw.properties.OptionPropertyString(
-            "feature_vector", "Feature vector", [ivw.properties.StringOption("holeAndParticle", "Hole and particle", "holeAndParticle"), 
-                                                 ivw.properties.StringOption("difference", "Difference (particle - hole)", "difference"), 
-                                                 ivw.properties.StringOption("chargeTransferMatrix", "Charge transfer matrix", "chargeTransferMatrix")])
-        self.addProperty(self.featureVector)
-
+        
         self.dim1name = ivw.properties.StringProperty("dim1_name", "Dim 1 name", "1")
         self.addProperty(self.dim1name)
 
@@ -78,44 +66,17 @@ class DimensionalityReduction(ivw.Processor):
     def process(self):
         inputDataFrame = self.inport.getData()
 
-        # Get data from data frame
+        # Get feature vector from data frame
+        featureVector_name = self.featureVectorName.value.lower()
         X = []
         for i in range(0, inputDataFrame.rows):
-            row = []
+            fv_row = []
             for j in range(0, inputDataFrame.cols):
                 header = inputDataFrame.column(j).header.lower()
+                if featureVector_name in header:
+                    fv_row.append(inputDataFrame.column(j).get(i))
 
-                # Use hole and particle subgroup charges
-                if self.featureVector.value == "holeAndParticle":
-                    if ("hole" in header) or ("particle" in header):
-                        row.append(inputDataFrame.column(j).get(i))
-
-                # Use difference (particle - hole) charges
-                elif self.featureVector.value == "difference":
-                    if ("diff" in header):
-                         row.append(inputDataFrame.column(j).get(i))
-
-                # Use charge transfer matrix
-                elif self.featureVector.value == "chargeTransferMatrix":
-                    if ("transfer" in header):
-                        row.append(inputDataFrame.column(j).get(i))
-
-                # Add oscillatory strength to feature vector
-                if self.useOscStrength.value == True : 
-                    if ("osc" in header):
-                        row.append(inputDataFrame.column(j).get(i))
-
-                # Add rotatory strength to feature vector
-                if self.useRotStrength.value == True :
-                    if ("rot" in header):
-                        row.append(inputDataFrame.column(j).get(i))
-
-                # Add energy to feature vector
-                if self.useEnergy.value == True :
-                    if ("energy" in header):
-                        row.append(inputDataFrame.column(j).get(i))
-
-            X.append(row)
+            X.append(fv_row)
 
         X = np.array(X)
         print("Dimensions before reduction: " + str(X.shape))
