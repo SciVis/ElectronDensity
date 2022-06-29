@@ -11,6 +11,8 @@ Python libraries needed:
 
 Some processors also require the [ElectronicTransitionsLOD repository](https://github.com/tbmasood/ElectronicTransitionsLOD) (using Java).
 
+An example workspace is located in the data folder in the MolecularChargeTransitions module, which uses some randomly generated test data. 
+
 ```
  @article{thygesen2022level,
   title={Level of Detail Exploration of Electronic Transition Ensembles using Hierarchical Clustering},
