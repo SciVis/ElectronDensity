@@ -1,6 +1,6 @@
 # Level of Detail Exploration of Electronic Transition Ensembles using Hierarchical clustering
 
-This repository contains code for the visual analysis pipeline to explore ensembles of electronic transitions (paper presented at EuroVis 2022).
+This repository contains code for the visual analysis pipeline to explore ensembles of electronic transitions ([paper presented at EuroVis 2022](https://diglib.eg.org/bitstream/handle/10.1111/cgf14544/v41i3pp333-344.pdf)).
 It is built upon the [Inviwo visualization framework](https://inviwo.org/). To use it you will first need to checkout the [Inviwo github repository](https://github.com/inviwo/inviwo) and follow the [Inviwo build instructions](https://inviwo.org/manual-gettingstarted-build.html).
 In CMake, add the path to the 'modules' folder in this repository to IVW_EXTERNAL_MODULES.
 
@@ -9,7 +9,7 @@ Python libraries needed:
 - scipy (>= 1.6.0)
 - matplotlib
 
-Some processors also require the [ElectronicTransitionsLOD repository](https://github.com/tbmasood/ElectronicTransitionsLOD).
+Some processors also require the [ElectronicTransitionsLOD repository](https://github.com/tbmasood/ElectronicTransitionsLOD) (using Java).
 
 ```
  @article{thygesen2022level,
