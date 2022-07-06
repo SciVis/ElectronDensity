@@ -113,7 +113,6 @@ class CreateClusterTransitionDiagrams(ivw.Processor):
                             for j in range(0, inputDataFrame.cols):
                                 header = inputDataFrame.column(j).header.lower()
                                 if featureVector_name in header:
-                                #if ("hole" in header) or ("particle" in header):
                                     value = inputDataFrame.column(j).get(i)
                                     fv_row.append(value)
                                     text_file.write(f"{value} ")

@@ -91,7 +91,6 @@ class CreateAugmentedDendrogram(ivw.Processor):
                     fv_row = []
                     for j in range(0, inputDataFrame.cols):
                         header = inputDataFrame.column(j).header.lower()
-                        #if ("hole" in header) or ("particle" in header):
                         if featureVector_name in header:
                             value = inputDataFrame.column(j).get(i)
                             fv_row.append(value)
