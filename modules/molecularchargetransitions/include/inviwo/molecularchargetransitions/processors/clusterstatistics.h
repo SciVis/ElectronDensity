@@ -40,17 +40,23 @@ namespace inviwo {
 
 /** \docpage{org.inviwo.ClusterStatistics, Cluster Statistics}
  * ![](org.inviwo.ClusterStatistics.png?classIdentifier=org.inviwo.ClusterStatistics)
- * Explanation of how to use the processor.
+ *
+ * Processor to calculate some statistics for an ensemble of electronic transitions.
  *
  * ### Inports
- *   * __<Inport1>__ <description>.
+ *   * __inport__   Dataframe containing cluster id, hole charges, particle charges and measure of
+ * locality value for each ensemble member.
  *
  * ### Outports
- *   * __<Outport1>__ <description>.
+ *   * __outport__ Min and max particle and hole charges for each cluster??.
+ *   * __diffOutport__ Difference between min and max within each cluster??.
+ *   * __meanOutport__ Mean and variance for each cluster.
+ *   * __meanMeasureOfLocalityOutport__ Mean of measure of locality for each cluster.
  *
  * ### Properties
- *   * __<Prop1>__ <description>.
- *   * __<Prop2>__ <description>
+ *   * __nrSubgroups__ How many subgroups each member in the ensemble has.
+ *   * __clusterCol__ Selecting which column contains the cluster id.
+ *   * __measureOfLocalityCol__ Selecting which column contains measure of locality value.
  */
 class IVW_MODULE_MOLECULARCHARGETRANSITIONS_API ClusterStatistics : public Processor {
 public:

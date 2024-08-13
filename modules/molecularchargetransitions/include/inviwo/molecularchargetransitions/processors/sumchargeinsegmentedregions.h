@@ -48,17 +48,20 @@ namespace inviwo {
 
 /** \docpage{org.inviwo.SumChargeInSegmentedRegions, Sum Charge In Segmented Regions}
  * ![](org.inviwo.SumChargeInSegmentedRegions.png?classIdentifier=org.inviwo.SumChargeInSegmentedRegions)
- * Explanation of how to use the processor.
+ *
+ * Sums up the values (charge) in a volume based on a segmentation of that volume. Also adds these
+ * regions together based on a subgroup file provided.
  *
  * ### Inports
- *   * __<Inport1>__ <description>.
+ *   * __segmentation__ Segmentation of the volume.
+ *   * __volumeValues__ The volume containing values (charges) that should be accumulated.
  *
  * ### Outports
- *   * __<Outport1>__ <description>.
+ *   * __chargePerRegion__ Summed up value (charge) per segmented region.
+ *   * __chargePerSubgroup__ Summed up value (charge) per subgroup, which is multiple regions.
  *
  * ### Properties
- *   * __<Prop1>__ <description>.
- *   * __<Prop2>__ <description>
+ *   * __fileLocation__ Path to a file stating which regions belong to each subgroup.
  */
 class IVW_MODULE_MOLECULARCHARGETRANSITIONS_API SumChargeInSegmentedRegions : public Processor {
 public:
