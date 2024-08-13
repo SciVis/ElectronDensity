@@ -143,7 +143,7 @@ class CreateDendrogram(ivw.Processor):
         print("CreateDendrogram, dimensions of X: " + str(X.shape))
 
         # setting distance_threshold=0 ensures we compute the full tree.
-        model = AgglomerativeClustering(distance_threshold=self.threshold.value, n_clusters=None, linkage=self.linkage.value, affinity=self.distanceMetric.value)
+        model = AgglomerativeClustering(distance_threshold=self.threshold.value, n_clusters=None, linkage=self.linkage.value, metric=self.distanceMetric.value)
         
         model = model.fit(X)
 
@@ -215,6 +215,7 @@ class CreateDendrogram(ivw.Processor):
                 print('CreateDendrogram: specify a valid file location!')
             else:
                 print('Saving dendrogram figure')
+                print('location: ' + str(self.fileLocation.value + '/' + self.fileName.value + self.fileFormat.value))
                 plt.savefig(self.fileLocation.value + '/' + self.fileName.value + self.fileFormat.value, bbox_inches='tight')
                 #self.reloadButton.press()
 

@@ -76,7 +76,7 @@ void SumChargeInSegmentedRegions::process() {
         chargePerRegion_.setData(nullptr);
         chargePerSubgroup_.setData(nullptr);
     } else {
-        const auto range = segmentationData->dataMap_.valueRange;
+        const auto range = segmentationData->dataMap.valueRange;
 
         // TODO: do I really need to set an initial value here?
         auto indicesToAccumulatedValue = std::unordered_map<uint16_t, float>();

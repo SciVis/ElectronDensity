@@ -3,6 +3,8 @@
 import inviwopy as ivw
 import ivwdataframe as df
 
+import numpy
+
 class ParameterSource(ivw.Processor):
     def __init__(self, id, name):
         ivw.Processor.__init__(self, id, name)
@@ -58,10 +60,10 @@ class ParameterSource(ivw.Processor):
         # OBS: assuming the parameters come in this specific order!
         dataframe = df.DataFrame()
         dataframe.addCategoricalColumn("Name", name)
-        dataframe.addFloatColumn("Energy (eV)", energyEv)
-        dataframe.addFloatColumn("Wavelength (nm)", vawelengthNm)
-        dataframe.addFloatColumn("Oscillatory strength", oscillatoryStrength)
-        dataframe.addFloatColumn("Rotatory strength", rotatoryStrength)
+        dataframe.addFloatColumn("Energy (eV)", numpy.array(energyEv).astype(numpy.float32))
+        dataframe.addFloatColumn("Wavelength (nm)", numpy.array(vawelengthNm).astype(numpy.float32))
+        dataframe.addFloatColumn("Oscillatory strength", numpy.array(oscillatoryStrength).astype(numpy.float32))
+        dataframe.addFloatColumn("Rotatory strength", numpy.array(rotatoryStrength).astype(numpy.float32))
         dataframe.updateIndex()
 
         self.outport.setData(dataframe)
