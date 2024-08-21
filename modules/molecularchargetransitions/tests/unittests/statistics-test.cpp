@@ -38,27 +38,27 @@ namespace inviwo {
 
 TEST(MolecularChargeTransitions, Mean_VectorWithTwoElements_CalculatesCorrectly) {
     auto v = std::vector<float>{8.0f, 10.0f};
-    auto mean = Statistics::meanValue(v);
+    auto mean = VectorStatistics::meanValue(v);
 
     EXPECT_FLOAT_EQ(9.0f, mean);
 }
 
 TEST(MolecularChargeTransitions, Variance_VectorWithTwoElements_CalculatesCorrectly) {
     auto v = std::vector<float>{8.0f, 10.0f};
-    auto var = Statistics::variance(v, 9.0f);
+    auto var = VectorStatistics::variance(v, 9.0f);
 
     EXPECT_FLOAT_EQ(1.0f, var);
 }
 TEST(MolecularChargeTransitions, Mean_VectorWithThreeElements_CalculatesCorrectly) {
     auto v = std::vector<float>{8.0f, 10.0f, 15.0f};
-    auto mean = Statistics::meanValue(v);
+    auto mean = VectorStatistics::meanValue(v);
 
     EXPECT_FLOAT_EQ(11.0f, mean);
 }
 
 TEST(MolecularChargeTransitions, Variance_VectorWithThreeElements_CalculatesCorrectly) {
     auto v = std::vector<float>{8.0f, 10.0f, 15.0f};
-    auto var = Statistics::variance(v, 11.0f);
+    auto var = VectorStatistics::variance(v, 11.0f);
 
     EXPECT_FLOAT_EQ(8.66667f, var);
 }

@@ -32,12 +32,12 @@
 
 namespace inviwo {
 
-float Statistics::meanValue(const std::vector<float>& values) {
+float VectorStatistics::meanValue(const std::vector<float>& values) {
     const auto sum = std::accumulate(values.begin(), values.end(), 0.0f);
     return sum / values.size();
 }
 
-float Statistics::variance(const std::vector<float>& values, const float& mean) {
+float VectorStatistics::variance(const std::vector<float>& values, const float& mean) {
     const auto sqSum = std::inner_product(values.begin(), values.end(), values.begin(), 0.0f);
     return sqSum / values.size() - mean * mean;
 }

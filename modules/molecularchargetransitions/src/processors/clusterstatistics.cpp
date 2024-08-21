@@ -190,11 +190,11 @@ void ClusterStatistics::process() {
                                                        particleChargesForCluster.cend());
             const auto maxParticle = *std::max_element(particleChargesForCluster.cbegin(),
                                                        particleChargesForCluster.cend());
-            const auto meanHole = Statistics::meanValue(holeChargesForCluster);
-            const auto varianceHole = Statistics::variance(holeChargesForCluster, meanHole);
-            const auto meanParticle = Statistics::meanValue(particleChargesForCluster);
+            const auto meanHole = VectorStatistics::meanValue(holeChargesForCluster);
+            const auto varianceHole = VectorStatistics::variance(holeChargesForCluster, meanHole);
+            const auto meanParticle = VectorStatistics::meanValue(particleChargesForCluster);
             const auto varianceParticle =
-                Statistics::variance(particleChargesForCluster, meanParticle);
+                VectorStatistics::variance(particleChargesForCluster, meanParticle);
 
             if (subgroupToClusterStatistics_hole.empty() &&
                 subgroupToClusterStatistics_particle.empty()) {
@@ -257,7 +257,7 @@ void ClusterStatistics::process() {
             allMeasureOfLocalityInCluster.push_back(measureOfLocalityData[ind]);
         }
         meanOfMeasureOfLocaliesInClusters.push_back(
-            Statistics::meanValue(allMeasureOfLocalityInCluster));
+            VectorStatistics::meanValue(allMeasureOfLocalityInCluster));
     }
 
     auto dataFrame = std::make_shared<DataFrame>(static_cast<glm::u32>(clusterNrToIndex.size()));

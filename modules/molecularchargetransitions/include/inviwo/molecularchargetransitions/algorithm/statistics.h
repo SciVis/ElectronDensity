@@ -37,7 +37,7 @@ namespace inviwo {
  * meanValue - calculates mean value of input values in vector
  * variance - calculates variance of input values in vector (assumes the values are the whole population)
  */
-class IVW_MODULE_MOLECULARCHARGETRANSITIONS_API Statistics {
+class IVW_MODULE_MOLECULARCHARGETRANSITIONS_API VectorStatistics {
 public:
     static float meanValue(const std::vector<float>& values);
     static float variance(const std::vector<float>& values, const float& mean);
