@@ -39,7 +39,7 @@ const ProcessorInfo ComputeChargeTransfer::processorInfo_{
     CodeState::Experimental,             // Code state
     Tags::None,                          // Tags
 };
-const ProcessorInfo ComputeChargeTransfer::getProcessorInfo() const { return processorInfo_; }
+const ProcessorInfo& ComputeChargeTransfer::getProcessorInfo() const { return processorInfo_; }
 
 ComputeChargeTransfer::ComputeChargeTransfer()
     : Processor()

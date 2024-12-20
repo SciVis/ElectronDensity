@@ -39,7 +39,7 @@ const ProcessorInfo ClusterStatistics::processorInfo_{
     CodeState::Experimental,         // Code state
     Tags::None,                      // Tags
 };
-const ProcessorInfo ClusterStatistics::getProcessorInfo() const { return processorInfo_; }
+const ProcessorInfo& ClusterStatistics::getProcessorInfo() const { return processorInfo_; }
 
 ClusterStatistics::ClusterStatistics()
     : Processor()

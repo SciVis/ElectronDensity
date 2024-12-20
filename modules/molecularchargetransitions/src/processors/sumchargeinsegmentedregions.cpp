@@ -39,7 +39,7 @@ const ProcessorInfo SumChargeInSegmentedRegions::processorInfo_{
     CodeState::Experimental,                   // Code state
     Tags::None,                                // Tags
 };
-const ProcessorInfo SumChargeInSegmentedRegions::getProcessorInfo() const { return processorInfo_; }
+const ProcessorInfo& SumChargeInSegmentedRegions::getProcessorInfo() const { return processorInfo_; }
 
 SumChargeInSegmentedRegions::SumChargeInSegmentedRegions()
     : Processor()
